@@ -1,25 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-// favorites hook
 export const useFavorites = () => {
   const { user } = useAuth();
   const [favorites, setFavorites] = useState([]);
 
-  const loadFavorites = () => {
+  const loadFavorites = useCallback(() => {
     if (!user) {
       setFavorites([]);
       return;
     }
-
-    const stored = localStorage.getItem(`favorites_${user.uid}`);
-    const parsed = stored ? JSON.parse(stored) : [];
-    setFavorites(parsed);
-  };
+    try {
+      const stored = localStorage.getItem(`favorites_${user.uid}`);
+      const parsed = stored ? JSON.parse(stored) : [];
+      setFavorites(parsed);
+    } catch (error) {
+      console.error("Failed to parse favorites", error);
+      setFavorites([]);
+    }
+  }, [user]);
 
   useEffect(() => {
     loadFavorites();
-  }, [user]);
+  }, [loadFavorites]);
 
   const addToFavorites = (toyId) => {
     if (!user) return false;
@@ -36,7 +39,6 @@ export const useFavorites = () => {
     return true;
   };
 
-  // remove function
   const removeFromFavorites = (toyId) => {
     if (!user) return false;
 
@@ -46,9 +48,7 @@ export const useFavorites = () => {
     return true;
   };
 
-  const isFavorite = (toyId) => {
-    return favorites.some(fav => fav.toyId === toyId);
-  };
+  const isFavorite = (toyId) => favorites.some(fav => fav.toyId === toyId);
 
   return {
     favorites,

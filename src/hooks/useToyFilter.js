@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// filter toys hook
 export const useToyFilter = (toys, initialCategory = 'All Categories') => {
   const [filteredToys, setFilteredToys] = useState(toys);
   const [searchQuery, setSearchQuery] = useState('');
@@ -9,15 +8,14 @@ export const useToyFilter = (toys, initialCategory = 'All Categories') => {
   useEffect(() => {
     let result = toys;
 
-    // search filter
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       result = result.filter(toy =>
-        toy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        toy.description.toLowerCase().includes(searchQuery.toLowerCase())
+        toy.name.toLowerCase().includes(query) ||
+        (toy.description && toy.description.toLowerCase().includes(query))
       );
     }
 
-    // category filter
     if (selectedCategory !== 'All Categories') {
       result = result.filter(toy => toy.category === selectedCategory);
     }
