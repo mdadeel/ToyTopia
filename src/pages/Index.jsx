@@ -6,7 +6,7 @@ import ModernToyCard from '@/components/ModernToyCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Star, ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield } from 'lucide-react';
+import { Search, Star, ChevronLeft, ChevronRight, ShoppingBag, Truck, Shield } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { useToyFilter } from '@/hooks/useToyFilter';

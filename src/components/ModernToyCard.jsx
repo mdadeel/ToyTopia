@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 const ModernToyCard = ({ toy }) => {
   const { id, name, description, price, image, category, rating = 0 } = toy;
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
   const [isFav, setIsFav] = useState(false);
 
@@ -19,7 +19,7 @@ const ModernToyCard = ({ toy }) => {
   }, [isFavorite, id]);
 
   const handleFavoriteToggle = () => {
-    if (!user) {
+    if (!currentUser) {
       toast.error("Please login to save favorites");
       return;
     }

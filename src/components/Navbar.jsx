@@ -5,7 +5,7 @@ import { User, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
-  const { user, signOut } = useAuth();
+  const { currentUser, signOut } = useAuth();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -37,9 +37,9 @@ const Navbar = () => {
   }, [lastScrollY]);
 
   const getUserDisplayName = () => {
-    if (!user) return 'Guest';
-    if (user.displayName) return user.displayName.split(' ')[0];
-    return user.email?.split('@')[0] || 'Friend';
+    if (!currentUser) return 'Guest';
+    if (currentUser.displayName) return currentUser.displayName.split(' ')[0];
+    return currentUser.email?.split('@')[0] || 'Friend';
   };
 
   return (
@@ -67,14 +67,14 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            {user ? (
+            {currentUser ? (
               <div className="flex items-center gap-4">
                 <Link to="/profile" className="flex items-center gap-2 hover:bg-gray-50 p-1.5 rounded-full transition-colors pr-3">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border border-gray-100">
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
+                    {currentUser.photoURL ? (
+                      <img src={currentUser.photoURL} alt={currentUser.displayName} className="w-full h-full object-cover" />
                     ) : (
-                      user.email?.charAt(0).toUpperCase()
+                      currentUser.email?.charAt(0).toUpperCase()
                     )}
                   </div>
                   <span className="font-medium text-gray-700 text-sm">
@@ -119,7 +119,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="h-px bg-gray-100 my-2" />
-              {user ? (
+              {currentUser ? (
                 <>
                   <Link
                     to="/profile"

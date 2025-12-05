@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Star, Heart, Package, User, ShoppingBag, Edit, Trash2 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import toysData from '@/data/toys.json';
@@ -17,100 +17,73 @@ import { z } from 'zod';
 
 const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
-  comment: z.string().trim().max(500, { message: "Comment must be less than 500 characters" }),
+  comment: z.string().trim().max(500, "Comment cannot exceed 500 characters"),
 });
 
 const ToyDetails = () => {
   const { id } = useParams();
-  const { user } = useAuth();
-  const { isFavorite: isToyFavorite, addToFavorites, removeFromFavorites, loadFavorites } = useFavorites();
+  const { currentUser } = useAuth();
+  const { isFavorite: isToyFavorite, addToFavorites, removeFromFavorites } = useFavorites();
   const navigate = useNavigate();
+
   const [toy, setToy] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Review Form State
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
-  const [editingReview, setEditingReview] = useState(null);
-  const [tryNowName, setTryNowName] = useState('');
-  const [tryNowEmail, setTryNowEmail] = useState('');
+  const [editingReviewId, setEditingReviewId] = useState(null);
+
+  // Inquiry Form State
+  const [inquiryName, setInquiryName] = useState('');
+  const [inquiryEmail, setInquiryEmail] = useState('');
 
   useEffect(() => {
-    document.title = 'Toy Details | ToyTopia';
-  }, []);
-
-  useEffect(() => {
-    fetchToyDetails();
-  }, [id]);
-
-  useEffect(() => {
-    if (toy) {
-      document.title = `${toy.name} | ToyTopia`;
+    const foundToy = toysData.toys.find(t => t.id === id);
+    if (!foundToy) {
+      toast.error("Toy not found");
+      navigate('/');
+      return;
     }
-  }, [toy]);
+    setToy(foundToy);
+    document.title = `${foundToy.name} | ToyTopia`;
+    setLoading(false);
+
+    // Load reviews
+    try {
+      const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+      setReviews(allReviews.filter(r => r.toyId === id));
+    } catch (e) {
+      console.error("Failed to load reviews", e);
+    }
+  }, [id, navigate]);
 
   useEffect(() => {
     setIsFavorite(isToyFavorite(id));
   }, [isToyFavorite, id]);
 
-  const fetchToyDetails = async () => {
-    try {
-      const foundToy = toysData.toys.find(t => t.id === id);
-      if (!foundToy) {
-        toast({
-          title: "Toy not found",
-          description: "The requested toy does not exist",
-          variant: "destructive",
-        });
-        navigate('/');
-        return;
-      }
-
-      setToy(foundToy);
-      setReviews([]);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleFavorite = () => {
-    if (!user) {
-      toast({
-        title: "Login required",
-        description: "Please log in to continue",
-      });
+  const handleFavoriteToggle = () => {
+    if (!currentUser) {
+      toast.error("Please login to save favorites");
       navigate('/auth');
       return;
     }
-
     if (isFavorite) {
-      const success = removeFromFavorites(id);
-      if (success) {
-        setIsFavorite(false);
-        toast({ title: "Removed from favorites" });
-      }
+      removeFromFavorites(id);
+      setIsFavorite(false);
+      toast.success("Removed from favorites");
     } else {
-      const success = addToFavorites(id);
-      if (success) {
-        setIsFavorite(true);
-        toast({ title: "Added to favorites!" });
-      }
+      addToFavorites(id);
+      setIsFavorite(true);
+      toast.success("Added to favorites");
     }
   };
 
-  const submitReview = () => {
-    if (!user) {
-      toast({
-        title: "Login required",
-        description: "Please log in to continue",
-      });
+  const handleReviewSubmit = () => {
+    if (!currentUser) {
+      toast.error("Please login to review");
       navigate('/auth');
       return;
     }
@@ -118,393 +91,281 @@ const ToyDetails = () => {
     try {
       reviewSchema.parse({ rating, comment });
 
-      let reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+      const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+      let updatedReviews;
 
-      if (editingReview) {
-        reviews = reviews.map(review =>
-          review.id === editingReview
-            ? { ...review, rating, comment, updatedAt: new Date().toISOString() }
-            : review
+      if (editingReviewId) {
+        updatedReviews = allReviews.map(r =>
+          r.id === editingReviewId
+            ? { ...r, rating, comment, updatedAt: new Date().toISOString() }
+            : r
         );
-        toast({ title: "Review updated!" });
-        setEditingReview(null);
+        toast.success("Review updated successfully");
       } else {
         const newReview = {
           id: `review-${Date.now()}`,
           toyId: id,
-          userId: user.uid,
-          userEmail: user.email,
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
           rating,
           comment,
           createdAt: new Date().toISOString()
         };
-        reviews.push(newReview);
-        toast({ title: "Review submitted!" });
+        updatedReviews = [...allReviews, newReview];
+        toast.success("Review submitted successfully");
       }
 
-      localStorage.setItem('reviews', JSON.stringify(reviews));
-      setRating(5);
-      setComment('');
-
-      // Update reviews
-      const toyReviews = reviews.filter(r => r.toyId === id);
-      setReviews(toyReviews);
+      localStorage.setItem('reviews', JSON.stringify(updatedReviews));
+      setReviews(updatedReviews.filter(r => r.toyId === id));
+      resetReviewForm();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation error",
-          description: "Please check your input",
-          variant: "destructive",
-        });
+        toast.error(error.errors[0].message);
       } else {
-        toast({
-          title: "Error",
-          description: "An error occurred",
-          variant: "destructive",
-        });
+        toast.error("Something went wrong");
       }
     }
   };
 
-  const deleteReview = (reviewId) => {
-    try {
-      let reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      reviews = reviews.filter(review => review.id !== reviewId);
-      localStorage.setItem('reviews', JSON.stringify(reviews));
+  const handleDeleteReview = (reviewId) => {
+    if (!confirm("Are you sure you want to delete this review?")) return;
 
-      toast({
-        title: "Review deleted"
-      });
+    const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+    const updatedReviews = allReviews.filter(r => r.id !== reviewId);
 
-      // Update reviews
-      const toyReviews = reviews.filter(r => r.toyId === id);
-      setReviews(toyReviews);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred",
-        variant: "destructive",
-      });
-    }
+    localStorage.setItem('reviews', JSON.stringify(updatedReviews));
+    setReviews(updatedReviews.filter(r => r.toyId === id));
+    toast.success("Review deleted");
   };
 
-  const startEdit = (review) => {
-    setEditingReview(review.id);
-    setRating(review.rating);
-    setComment(review.comment || '');
-  };
-
-  const cancelEdit = () => {
-    setEditingReview(null);
+  const resetReviewForm = () => {
     setRating(5);
     setComment('');
+    setEditingReviewId(null);
   };
 
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 0;
+  const handleInquirySubmit = () => {
+    if (!inquiryName.trim() || !inquiryEmail.trim()) {
+      toast.error("Please fill in your details");
+      return;
+    }
+    toast.success(`Request received, ${inquiryName}! We'll contact you shortly.`);
+    setInquiryName('');
+    setInquiryEmail('');
+  };
 
-  if (loading || !toy) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center">Loading toy details...</p>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  if (loading || !toy) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col font-sans bg-gray-50/30">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
-          {/* Image */}
-          <div>
-            <div className="aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-gray-100">
+
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Product Image */}
+          <div className="space-y-4">
+            <div className="aspect-square rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm relative group">
               {toy.image ? (
-                <img
-                  src={toy.image}
-                  alt={toy.name}
-                  className="h-full w-full object-cover"
-                />
+                <img src={toy.image} alt={toy.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                  <Package className="h-16 sm:h-20 w-16 sm:w-20 text-gray-300" />
+                <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                  <Package className="h-20 w-20 text-gray-300" />
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Details */}
-          <div className="space-y-4 sm:space-y-6">
-            <div>
-              <Badge variant="secondary" className="text-xs sm:text-sm">{toy.category}</Badge>
-              <h1 className="text-2xl sm:text-3xl font-bold mt-2 mb-3 sm:mb-4">{toy.name}</h1>
-              <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 sm:h-5 sm:w-5 ${i < Math.floor(toy.rating)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                        }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-muted-foreground text-sm">
-                  ({toy.rating} from 0 reviews)
-                </span>
-              </div>
-              <p className="text-muted-foreground text-sm sm:text-base">
-                {toy.description}
-              </p>
-            </div>
-
-            <div className="space-y-2.5 sm:space-y-3">
-              {toy.age_group && (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <User className="h-4 w-4" />
-                  <span>Age Group: {toy.age_group}</span>
-                </div>
+              {toy.availableQuantity < 5 && (
+                <Badge variant="destructive" className="absolute top-4 left-4 text-xs font-bold animate-pulse">
+                  Only {toy.availableQuantity} left!
+                </Badge>
               )}
-              {toy.material && (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Package className="h-4 w-4" />
-                  <span>Material: {toy.material}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <ShoppingBag className="h-4 w-4" />
-                <span>Stock: {toy.availableQuantity} available</span>
-              </div>
             </div>
 
-            <Card>
-              <CardContent className="pt-4 sm:pt-6">
-                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Sold by</p>
-                <p className="font-semibold text-sm sm:text-base">{toy.seller_name}</p>
-                {toy.seller_info && (
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">{toy.seller_info}</p>
-                )}
+            {/* Inquiry Form (Mobile/Desktop) */}
+            <Card className="bg-blue-50/50 border-blue-100">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2 text-blue-800">
+                  <Package className="h-5 w-5" />
+                  Request a Demo
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    placeholder="Your Name"
+                    value={inquiryName}
+                    onChange={(e) => setInquiryName(e.target.value)}
+                    className="bg-white"
+                  />
+                  <Input
+                    placeholder="Your Email or Phone"
+                    value={inquiryEmail}
+                    onChange={(e) => setInquiryEmail(e.target.value)}
+                    className="bg-white"
+                  />
+                </div>
+                <Button onClick={handleInquirySubmit} className="w-full font-bold">
+                  Send Inquiry
+                </Button>
               </CardContent>
             </Card>
+          </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-              <div className="flex items-center gap-4">
-                <p className="text-2xl sm:text-3xl font-bold text-primary">
-                  ${toy.price.toFixed(2)}
-                </p>
+          {/* Product Info */}
+          <div className="space-y-8">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Badge variant="outline" className="px-3 py-1 text-sm font-medium border-primary/20 text-primary bg-primary/5">
+                  {toy.category}
+                </Badge>
+                <div className="flex items-center gap-1 text-yellow-500 font-bold text-sm">
+                  <Star className="h-4 w-4 fill-current" />
+                  {toy.rating} <span className="text-gray-400 font-normal">({reviews.length} reviews)</span>
+                </div>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4 leading-tight">{toy.name}</h1>
+              <p className="text-gray-600 text-lg leading-relaxed">{toy.description}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-xs uppercase font-bold mb-1">Age Group</p>
+                <p className="font-semibold text-gray-900">{toy.age_group || '3+ Years'}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-xs uppercase font-bold mb-1">Material</p>
+                <p className="font-semibold text-gray-900">{toy.material || 'Child Safe Plastic'}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-xs uppercase font-bold mb-1">Seller</p>
+                <p className="font-semibold text-gray-900">{toy.seller_name || 'ToyTopia Official'}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-xs uppercase font-bold mb-1">Availability</p>
+                <p className="font-semibold text-green-600">In Stock</p>
+              </div>
+            </div>
+
+            <div className="flex items-center items-stretch gap-4 border-t pt-6">
+              <div className="flex-1">
+                <p className="text-sm text-gray-500 font-medium">Total Price</p>
+                <p className="text-4xl font-black text-primary">${toy.price.toFixed(2)}</p>
+              </div>
+
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  className="text-red-500 border-red-200 hover:bg-red-50"
-                  onClick={() => toast({
-                    title: "Fixed Price Only!",
-                    description: "Sorry Bhai, market price high. No discount possible.",
-                    variant: "destructive"
-                  })}
+                  size="lg"
+                  className="h-auto text-red-500 border-red-200 hover:bg-red-50"
+                  onClick={() => toast.error("Sorry Bhai, fixed price! No bargaining 🙏")}
                 >
-                  Best Price
+                  Bargain?
+                </Button>
+                <Button
+                  size="lg"
+                  className={`h-auto px-8 gap-2 font-bold text-lg ${isFavorite ? 'bg-pink-50 text-pink-500 border-2 border-pink-200 hover:bg-pink-100 hover:text-pink-600' : ''}`}
+                  variant={isFavorite ? "ghost" : "default"}
+                  onClick={handleFavoriteToggle}
+                >
+                  <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
+                  {isFavorite ? 'Saved' : 'Add to Favorites'}
                 </Button>
               </div>
-              <Button
-                onClick={toggleFavorite}
-                variant={isFavorite ? "default" : "outline"}
-                size="lg"
-                className="gap-2 text-sm sm:text-base px-4 py-5 sm:px-6"
-              >
-                <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isFavorite ? 'fill-current' : ''}`} />
-                {isFavorite ? 'Favorited' : 'Add to Favorites'}
-              </Button>
             </div>
-          </div>
-        </div>
 
-        {/* Try Now Form */}
-        <Card className="mb-6 sm:mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Package className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
-              Try This Toy Now
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Your Name</label>
-                <Input
-                  type="text"
-                  placeholder="Enter your name"
-                  value={tryNowName}
-                  onChange={(e) => setTryNowName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Your Email</label>
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={tryNowEmail}
-                  onChange={(e) => setTryNowEmail(e.target.value)}
-                />
-              </div>
-            </div>
-            <Button
-              className="w-full mt-3 sm:mt-4"
-              onClick={() => {
-                if (!tryNowName.trim() || !tryNowEmail.trim()) {
-                  toast({
-                    title: "Form Error",
-                    description: "Please fill in both name and email",
-                    variant: "destructive",
-                  });
-                  return;
-                }
+            {/* Reviews Section */}
+            <div className="border-t pt-8">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                Customer Reviews
+                <Badge variant="secondary" className="rounded-full px-2">{reviews.length}</Badge>
+              </h3>
 
-                toast({
-                  title: "Request Received!",
-                  description: `Salam ${tryNowName}! We got your request. Shopkeeper will call you at ${tryNowEmail} very soon.`,
-                });
-
-                setTryNowName('');
-                setTryNowEmail('');
-              }}
-            >
-              Submit Request
-            </Button>
-          </CardContent>
-        </Card>
-        {/* Reviews Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Star className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
-              Customer Reviews
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 sm:space-y-6">
-            {/* Add Review Form */}
-            {user && (
-              <div className="p-3 sm:p-4 rounded-lg border border-dashed border-gray-300">
-                <h3 className="font-semibold text-base mb-3 sm:mb-4">
-                  {editingReview ? 'Edit Your Review' : 'Leave a Review'}
-                </h3>
-                <div className="space-y-3 sm:space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Rating</label>
-                    <div className="flex gap-0.5 sm:gap-1">
+              {currentUser ? (
+                <div className="bg-gray-50 p-6 rounded-xl mb-8">
+                  <h4 className="font-bold text-sm uppercase text-gray-500 mb-4">
+                    {editingReviewId ? 'Edit your review' : 'Write a review'}
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
                           onClick={() => setRating(star)}
+                          className={`transition-transform hover:scale-110 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
                         >
-                          <Star
-                            className={`h-5 w-5 sm:h-6 sm:w-6 ${star <= rating
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                              }`}
-                          />
+                          <Star className="h-8 w-8 fill-current" />
                         </button>
                       ))}
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Comment (optional)</label>
                     <Textarea
+                      placeholder="Share your experience... (e.g. My kid loved it!)"
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      placeholder="Share your experience with this toy..."
-                      maxLength={500}
-                      rows={3}
+                      className="bg-white"
                     />
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button onClick={submitReview} className="text-sm">
-                      {editingReview ? 'Update Review' : 'Submit Review'}
-                    </Button>
-                    {editingReview && (
-                      <Button onClick={cancelEdit} variant="outline" className="text-sm">
-                        Cancel
+                    <div className="flex gap-2">
+                      <Button onClick={handleReviewSubmit}>
+                        {editingReviewId ? 'Update Review' : 'Post Review'}
                       </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Reviews List */}
-            <div className="space-y-3 sm:space-y-4">
-              {reviews.length === 0 ? (
-                <p className="text-center text-muted-foreground py-3 sm:py-4 text-sm">
-                  No reviews yet. Be the first to review this toy!
-                </p>
-              ) : (
-                reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="p-3 sm:p-4 rounded-lg border border-gray-200"
-                  >
-                    <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3 mb-2 sm:mb-3">
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <Avatar className="h-6 w-6 sm:h-8 sm:w-8 mt-0.5">
-                          <AvatarFallback className="text-xs sm:text-sm">
-                            {review.userEmail.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold text-sm">
-                            {review.userEmail}
-                          </p>
-                          <div className="flex items-center gap-0.5 sm:gap-1 my-0.5 sm:my-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-3 w-3 sm:h-4 sm:w-4 ${i < review.rating
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-300'
-                                  }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      {user?.uid === review.userId && (
-                        <div className="flex gap-1 sm:gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => startEdit(review)}
-                            className="h-7 w-7 sm:h-8 sm:w-8 p-1.5"
-                          >
-                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteReview(review.id)}
-                            className="text-destructive hover:text-destructive h-7 w-7 sm:h-8 sm:w-8 p-1.5"
-                          >
-                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                        </div>
+                      {editingReviewId && (
+                        <Button variant="ghost" onClick={resetReviewForm}>Cancel</Button>
                       )}
                     </div>
-                    {review.comment && (
-                      <p className="text-muted-foreground text-sm">{review.comment}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1 sm:mt-2">
-                      Posted on {new Date(review.createdAt).toLocaleDateString()}
-                    </p>
                   </div>
-                ))
+                </div>
+              ) : (
+                <div className="bg-blue-50 p-4 rounded-lg text-center mb-8">
+                  <p className="text-blue-800">Please <Button variant="link" className="px-1 h-auto font-bold" onClick={() => navigate('/auth')}>login</Button> to write a review.</p>
+                </div>
               )}
+
+              <div className="space-y-4">
+                {reviews.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8 italic">No reviews yet. Be the first!</p>
+                ) : (
+                  reviews.map((review) => (
+                    <div key={review.id} className="border-b last:border-0 pb-4 last:pb-0">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>{review.userEmail?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-bold text-sm text-gray-900">{review.userEmail}</p>
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                              ))}
+                              <span className="text-xs text-gray-400 ml-2">
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        {currentUser?.uid === review.userId && (
+                          <div className="flex gap-1">
+                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
+                              setEditingReviewId(review.id);
+                              setRating(review.rating);
+                              setComment(review.comment);
+                            }}>
+                              <Edit className="h-4 w-4 text-gray-500" />
+                            </Button>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 hover:text-red-600" onClick={() => handleDeleteReview(review.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-gray-600 text-sm pl-10">{review.comment}</p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </main>
+
       <Footer />
     </div>
   );

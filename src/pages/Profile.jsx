@@ -4,23 +4,26 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Star, Trash2, Heart, User, Image, Save } from 'lucide-react';
+import { Star, Trash2, Heart, User, Image, Save, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const Profile = () => {
-  const { user, updateProfile, loading: authLoading } = useAuth();
-  const { favorites: favoriteIds, removeFromFavorites, loadFavorites } = useFavorites();
+  const { currentUser, updateUserInfo, isAuthLoading, signOut } = useAuth();
+  const { favorites: favoriteIds, removeFromFavorites } = useFavorites();
   const navigate = useNavigate();
+
   const [reviews, setReviews] = useState([]);
   const [favoriteToys, setFavoriteToys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+
+  // Edit Form State
   const [name, setName] = useState('');
   const [photoURL, setPhotoURL] = useState('');
   const [saving, setSaving] = useState(false);
@@ -30,288 +33,273 @@ const Profile = () => {
   }, []);
 
   useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user) {
+    if (!isAuthLoading && !currentUser) {
       navigate('/auth');
-      return;
     }
-    setName(user.displayName || user.email?.split('@')[0] || '');
-    setPhotoURL(user.photoURL || '');
-    fetchUserData();
-  }, [user, authLoading, favoriteIds, navigate]);
+  }, [currentUser, isAuthLoading, navigate]);
 
-  const fetchUserData = async () => {
-    if (!user) return;
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Load user reviews from local storage (mock DB)
+        const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+        const userReviews = allReviews.filter(review => review.userId === currentUser.uid);
+        setReviews(userReviews);
 
-    try {
-      const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      const userReviews = allReviews.filter(review => review.userId === user.uid);
-      setReviews(userReviews);
+        // Load favorites details
+        const toysData = await import('@/data/toys.json');
+        const favToys = toysData.toys.filter(toy => favoriteIds.map(fav => fav.toyId).includes(toy.id));
+        setFavoriteToys(favToys);
+      } catch (error) {
+        console.error("Failed to load user data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const toysData = await import('@/data/toys.json');
-      const favoriteToys = toysData.toys.filter(toy => favoriteIds.map(fav => fav.toyId).includes(toy.id));
-      setFavoriteToys(favoriteToys);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    if (currentUser) {
+      setName(currentUser.displayName || '');
+      setPhotoURL(currentUser.photoURL || '');
+      fetchUserData();
     }
-  };
+  }, [currentUser, favoriteIds]);
 
   const handleSaveProfile = async () => {
+    if (!name.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
     setSaving(true);
     try {
-      const updatedUser = await updateProfile(name, photoURL);
-      if (updatedUser) {
-        setEditing(false);
-        setName(updatedUser.displayName || updatedUser.email?.split('@')[0] || '');
-        setPhotoURL(updatedUser.photoURL || '');
-      }
+      await updateUserInfo(name, photoURL);
+      setEditing(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // Error handled by AuthContext
     } finally {
       setSaving(false);
     }
   };
 
   const deleteReview = async (reviewId) => {
+    if (!confirm("Delete this review?")) return;
+
     try {
       let allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-      allReviews = allReviews.filter(review => review.id !== reviewId);
-      localStorage.setItem('reviews', JSON.stringify(allReviews));
+      const updatedReviews = allReviews.filter(review => review.id !== reviewId);
+      localStorage.setItem('reviews', JSON.stringify(updatedReviews));
 
-      toast({
-        title: "Success",
-        description: "Review deleted successfully",
-      });
+      toast.success("Review deleted successfully");
       fetchUserData();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error("Failed to delete review");
     }
   };
 
   const removeFavorite = async (toyId) => {
-    const success = removeFromFavorites(toyId);
-    if (success) {
-      toast({
-        title: "Success",
-        description: "Removed from favorites",
-      });
+    removeFromFavorites(toyId);
+    toast.success("Removed from favorites");
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error("Logout failed", error);
     }
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center">Fetching your data... (Checking database)</p>
-        </div>
-        <Footer />
-      </div>
-    );
+  if (isAuthLoading || loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading profile...</div>;
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col font-sans bg-gray-50/50">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
-        {/* User profile */}
-        <Card className="mb-6 sm:mb-8">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4">
-              <div className="relative">
-                <Avatar className="h-12 w-12 sm:h-16 sm:w-16">
-                  <AvatarImage src={photoURL || user?.photoURL} alt="Profile" />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {(name || user?.displayName)?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex-1 w-full text-center sm:text-left">
-                {editing ? (
-                  <div className="w-full space-y-3 sm:space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="text-center text-sm sm:text-base"
-                        placeholder="Enter your name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="photoURL">Photo URL</Label>
-                      <Input
-                        id="photoURL"
-                        type="url"
-                        value={photoURL}
-                        onChange={(e) => setPhotoURL(e.target.value)}
-                        className="text-center text-sm sm:text-base"
-                        placeholder="https://example.com/photo.jpg"
-                      />
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2 justify-center sm:justify-start">
-                      <Button 
-                        onClick={handleSaveProfile} 
-                        disabled={saving}
-                        className="gap-2 text-sm"
-                      >
-                        <Save className="h-4 w-4" />
-                        {saving ? 'Updating...' : 'Update My Info'}
-                      </Button>
-                      <Button 
-                        onClick={() => {
+
+      <main className="flex-1 container mx-auto px-4 py-8 sm:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          {/* Left Column: User Profile Card */}
+          <div className="md:col-span-1">
+            <Card className="sticky top-24 shadow-sm border-gray-100 overflow-hidden">
+              <div className="h-24 bg-gradient-to-r from-primary/10 to-primary/5"></div>
+              <CardContent className="pt-0 relative px-6">
+                <div className="flex justify-center -mt-12 mb-4">
+                  <Avatar className="h-24 w-24 border-4 border-white shadow-sm bg-white">
+                    <AvatarImage src={photoURL || currentUser?.photoURL} alt="Profile" />
+                    <AvatarFallback className="bg-gray-100 text-gray-500 text-2xl font-bold">
+                      {(name || currentUser?.displayName)?.charAt(0)?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+
+                <div className="text-center mb-6">
+                  {editing ? (
+                    <div className="space-y-4 animate-in fade-in duration-300">
+                      <div className="space-y-2 text-left">
+                        <Label>Full Name</Label>
+                        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" />
+                      </div>
+                      <div className="space-y-2 text-left">
+                        <Label>Photo URL</Label>
+                        <Input value={photoURL} onChange={(e) => setPhotoURL(e.target.value)} placeholder="https://..." />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <Button className="flex-1" onClick={handleSaveProfile} disabled={saving}>
+                          {saving ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                        <Button variant="outline" onClick={() => {
                           setEditing(false);
-                          setName(user.displayName || user.email?.split('@')[0] || '');
-                          setPhotoURL(user.photoURL || '');
-                        }} 
-                        variant="outline"
-                        className="text-sm"
-                      >
-                        Don't Change
-                      </Button>
+                          setName(currentUser.displayName || '');
+                          setPhotoURL(currentUser.photoURL || '');
+                        }} disabled={saving}>
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
+                  ) : (
+                    <>
+                      <h2 className="text-xl font-bold text-gray-900">{name || currentUser?.displayName || 'User'}</h2>
+                      <p className="text-sm text-gray-500 mb-4">{currentUser?.email}</p>
+
+                      <div className="flex justify-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                          <User className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={handleSignOut}>
+                          <LogOut className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex justify-between text-sm py-1">
+                    <span className="text-gray-500">Member Since</span>
+                    <span className="font-medium">{new Date(currentUser?.metadata?.creationTime).toLocaleDateString()}</span>
                   </div>
-                ) : (
-                  <>
-                    <CardTitle className="text-xl sm:text-2xl">
-                      {name || user?.displayName || user?.email?.split('@')[0] || 'User'}!
-                    </CardTitle>
-                    <p className="text-muted-foreground text-sm">
-                      {user?.email}
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                      Member since {new Date(user?.metadata?.creationTime || '').toLocaleDateString()}
-                    </p>
-                    <Button 
-                      onClick={() => setEditing(true)} 
-                      variant="outline" 
-                      className="mt-2 gap-2 w-full sm:w-auto text-sm"
-                    >
-                      <User className="h-4 w-4" />
-                      Edit Profile
-                    </Button>
-                  </>
+                  <div className="flex justify-between text-sm py-1">
+                    <span className="text-gray-500">Total Reviews</span>
+                    <span className="font-medium">{reviews.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm py-1">
+                    <span className="text-gray-500">Saved Toys</span>
+                    <span className="font-medium">{favoriteToys.length}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column: Activity Feed */}
+          <div className="md:col-span-2 space-y-8">
+
+            {/* Favorites Section */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Heart className="h-5 w-5 text-red-500 fill-current" />
+                  Recent Favorites
+                </h3>
+                {favoriteToys.length > 0 && (
+                  <Link to="/favorites" className="text-primary text-sm font-medium hover:underline">
+                    View All
+                  </Link>
                 )}
               </div>
-            </div>
-          </CardHeader>
-        </Card>
 
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {/* User reviews */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 fill-current" />
-                My Reviews ({reviews.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4">
-              {reviews.length === 0 ? (
-                <p className="text-center text-muted-foreground py-3 sm:py-4 text-sm">
-                  No reviews yet. Start reviewing toys!
-                </p>
-              ) : (
-                reviews.map((review) => (
-                  <div key={review.id} className="p-3 sm:p-4 rounded-lg border border-gray-200">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-2 mb-2">
-                      <div>
-                        <h4 className="font-semibold text-sm sm:text-base">Toy Review</h4>
-                        <div className="flex items-center gap-0.5 sm:gap-1 my-0.5 sm:my-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                                i < review.rating
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
+              {favoriteToys.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {favoriteToys.slice(0, 4).map(toy => (
+                    <div key={toy.id} className="group flex bg-white border border-gray-100 rounded-lg p-3 hover:shadow-md transition-all">
+                      <div className="h-16 w-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                        {toy.image ? (
+                          <img src={toy.image} alt={toy.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center">
+                            <Star className="h-4 w-4 text-gray-300" />
+                          </div>
+                        )}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteReview(review.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7 sm:h-8 sm:w-8 p-1.5"
-                      >
-                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                      </Button>
+                      <div className="ml-3 flex-1 min-w-0">
+                        <Link to={`/toy/${toy.id}`} className="block font-medium text-gray-900 truncate hover:text-primary transition-colors">
+                          {toy.name}
+                        </Link>
+                        <p className="text-primary font-bold text-sm">${toy.price.toFixed(2)}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-0 text-gray-400 hover:text-destructive text-xs mt-1"
+                          onClick={() => removeFavorite(toy.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     </div>
-                    {review.comment && (
-                      <p className="text-xs sm:text-sm text-muted-foreground">{review.comment}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1 sm:mt-2">
-                      Reviewed on {new Date(review.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          {/* User favorites */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 fill-current" />
-                My Favorites ({favoriteToys.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4">
-              {favoriteToys.length === 0 ? (
-                <p className="text-center text-muted-foreground py-3 sm:py-4 text-sm">
-                  No favorites yet. Start adding toys!
-                </p>
+                  ))}
+                </div>
               ) : (
-                favoriteToys.map((favorite) => (
-                  <div key={favorite.id} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border border-gray-200">
-                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
-                      {favorite.image ? (
-                        <img
-                          src={favorite.image}
-                          alt={favorite.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm sm:text-base">{favorite.name}</h4>
-                      <p className="text-xs sm:text-sm text-primary font-medium">
-                        ${favorite.price.toFixed(2)}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFavorite(favorite.id)}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7 sm:h-8 sm:w-8 p-1.5"
-                    >
-                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </Button>
-                  </div>
-                ))
+                <div className="bg-white border border-dashed border-gray-200 rounded-lg p-8 text-center">
+                  <Heart className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500">No favorite toys yet.</p>
+                  <Button variant="link" asChild>
+                    <Link to="/all-toys">Browse Toys</Link>
+                  </Button>
+                </div>
               )}
-            </CardContent>
-          </Card>
+            </section>
+
+            {/* Reviews Section */}
+            <section>
+              <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+                <Star className="h-5 w-5 text-yellow-500 fill-current" />
+                My Reviews
+              </h3>
+
+              <div className="space-y-4">
+                {reviews.length > 0 ? (
+                  reviews.map(review => (
+                    <Card key={review.id} className="border-gray-100 shadow-sm">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-1 mb-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
+                              ))}
+                              <span className="text-gray-400 text-xs ml-2">
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {review.comment && (
+                              <p className="text-gray-700 text-sm mt-1">{review.comment}</p>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-400 hover:text-destructive -mr-2 -mt-2"
+                            onClick={() => deleteReview(review.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="bg-white border border-dashed border-gray-200 rounded-lg p-8 text-center">
+                    <Star className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-gray-500">You haven't reviewed any toys yet.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
         </div>
       </main>
       <Footer />

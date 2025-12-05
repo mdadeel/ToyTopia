@@ -31,7 +31,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (!isAuthLoading && currentUser) {
-      navigate('/');
+      navigate('/profile');
     }
   }, [currentUser, isAuthLoading, navigate]);
 

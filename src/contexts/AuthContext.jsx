@@ -107,13 +107,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    user: currentUser,
-    loading: isAuthLoading,
+    currentUser,
+    isAuthLoading,
     signUp,
     signIn,
     signInWithGoogle,
     signOut,
-    updateProfile: updateUserInfo,
+    updateUserInfo,
     resetPassword
   };
 
