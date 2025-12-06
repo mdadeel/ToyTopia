@@ -111,9 +111,19 @@ const ToyDetails = () => {
           <div className="flex items-center justify-between border-t pt-6">
             <div><p className="text-gray-500 text-sm">Price</p><p className="text-4xl font-bold text-blue-600">${toy.price}</p></div>
             <div className="flex gap-2">
+              {/* 
+                <button className="btn btn-outline">Favorite</button> 
+                */}
               <button onClick={handleLike} className={`btn ${liked ? 'btn-error' : 'btn-outline'}`}>{liked ? '❤️ Saved' : '🤍 Save'}</button>
             </div>
           </div>
+
+          {/* Version 1: just simple text */}
+          {/*
+            <div className="seller-info">
+              <p>{toy.seller_name}</p>
+            </div>
+            */}
 
           <div className="card bg-gray-50">
             <div className="card-body">

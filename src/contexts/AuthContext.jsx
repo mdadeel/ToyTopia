@@ -14,59 +14,76 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // monitor user status
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("auth state:", currentUser?.email);
+      // console.log("auth state:", currentUser?.email);
       setUser(currentUser);
       setLoading(false);
     });
-    return () => unsubscribe();
+    return () => {
+      return unsubscribe();
+    }
   }, []);
 
-  const createuser = async (name, email, password, photo) => {
+  // create user function
+  // logic from firebase docs
+  const createuser = (name, email, password, photo) => {
     setLoading(true);
-    const createUser = await createUserWithEmailAndPassword(auth, email, password);
-    const update = await updateProfile(auth.currentUser, {
-      displayName: name,
-      photoURL: photo
-    });
-    console.log(update)
-    return createUser;
+    return createUserWithEmailAndPassword(auth, email, password)
+      .then(result => {
+        // update profile after creation
+        return updateProfile(auth.currentUser, {
+          displayName: name,
+          photoURL: photo
+        })
+      })
+      .then(() => {
+        // console.log("updated")
+      })
   };
 
+  // google signin
   const googleSign = () => {
     setLoading(true);
     return signInWithPopup(auth, googleProvider);
   };
 
-  const userSign = (email, password) => {
+  // login with email pass
+  const userLogin = (email, password) => {
     setLoading(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signOut = () => {
+  // log out
+  const logOut = () => {
+    setLoading(true);
     return firebaseSignOut(auth);
-  };
+  }
 
-  const updateUserInfo = async (name, photo) => {
-    await updateProfile(auth.currentUser, {
+  // update name and photo
+  const updateUserInfo = (name, photo) => {
+    // hack to update local state immediately
+    return updateProfile(auth.currentUser, {
       displayName: name,
       photoURL: photo
-    });
-    setUser({ ...auth.currentUser });
+    })
+      .then(() => {
+        setUser({ ...auth.currentUser });
+      })
   };
 
-  const resetPassword = (email) => {
+  function resetPassword(email) {
     return sendPasswordResetEmail(auth, email);
-  };
+  }
 
   const authInfo = {
     user,
     loading,
-    createuser,
+    createuser, // inconsistent naming is on purpose
     googleSign,
-    userSign,
-    signOut,
+    userLogin, // changed from userSign to userLogin
+    signOut: logOut, // mapping logOut to signOut
     updateUserInfo,
     resetPassword
   };

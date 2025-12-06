@@ -12,14 +12,20 @@ const Home = () => {
   const toys = toysData.toys;
   const location = useLocation();
 
+  // const [search, setSearch] = useState('');
+  // const [catagory, setCatagory] = useState('All Catagories');
+  // const [showCount, setShowCount] = useState(8);
+
+  // new states
   const [search, setSearch] = useState('');
-  const [catagory, setCatagory] = useState('All Catagories');
+  const [catagory, setCatagory] = useState('All Catagories'); // keeping spell mistake for now
   const [showCount, setShowCount] = useState(8);
 
   let filteredToys = toys;
   if (search) {
     let q = search.toLowerCase();
     filteredToys = filteredToys.filter(toy => {
+      // search by name or description
       let nameMatch = toy.name.toLowerCase().includes(q);
       let descMatch = toy.description && toy.description.toLowerCase().includes(q);
       return nameMatch || descMatch;
@@ -28,7 +34,7 @@ const Home = () => {
   if (catagory !== 'All Catagories') {
     filteredToys = filteredToys.filter(toy => toy.category === catagory);
   }
-  console.log("filtered:", filteredToys.length);
+  // console.log("filtered:", filteredToys.length);
 
   const catagories = [
     'All Catagories',
@@ -42,12 +48,22 @@ const Home = () => {
     'Board Games'
   ];
 
+  /*
   useEffect(() => {
+    fetch('https://toypia-server.vercel.app/toys')
+      .then(res => res.json())
+      .then(data => setToys(data))
+  }, [])
+  */
+
+  useEffect(() => {
+    // scroll to top
     window.scrollTo(0, 0);
     document.title = "ToyTopia || Home";
     AOS.init({ duration: 1000 });
   }, [location]);
 
+  // FIXME: sometimes this runs twice
   useEffect(() => {
     setShowCount(8);
   }, [search, catagory]);
@@ -59,6 +75,7 @@ const Home = () => {
     }
   };
 
+  // TODO: add loader here
   const loadMore = () => {
     setShowCount(prev => prev + 8);
   };

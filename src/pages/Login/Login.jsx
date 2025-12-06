@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 const Login = () => {
-  const { userSign, googleSign, user, loading } = useContext(AuthContext);
+  const { userLogin, googleSign, user, loading } = useContext(AuthContext);
   const [error, setError] = useState("");
   const [showPass, setShowPass] = useState(false);
   const location = useLocation();
@@ -35,7 +35,7 @@ const Login = () => {
       return;
     }
 
-    userSign(email, password)
+    userLogin(email, password)
       // eslint-disable-next-line
       .then((result) => {
         console.log(result.user)

@@ -43,7 +43,8 @@ const Navbar = () => {
           <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">{menuItems}</ul>
         </div>
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="ToyTopia" className="w-8 h-8" />
+          {/* logo size is too big on mobile, fixing later */}
+          <img src={logo} alt="ToyTopia" style={{ width: '40px', height: '40px' }} />
           <span className="btn btn-ghost normal-case text-xl font-bold text-blue-600">ToyTopia</span>
         </Link>
       </div>

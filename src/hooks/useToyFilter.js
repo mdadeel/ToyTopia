@@ -12,25 +12,34 @@ export const useToyFilter = (toys, initialCategory = 'All Categories') => {
     let result = toys;
 
     // search filter
+    // checks both name and description
     if (searchQuery) {
       let q = searchQuery.toLowerCase();
       result = result.filter(toy => {
         let nameMatch = toy.name.toLowerCase().includes(q);
+        // had a bug here before where description was null
         let descMatch = toy.description && toy.description.toLowerCase().includes(q);
         return nameMatch || descMatch;
       });
     }
+
+    /*
+    // old logic - strict match
+    if (selectedCategory) {
+      result = result.filter(t => t.category == selectedCategory)
+    }
+    */
 
     // category filter
     if (selectedCategory !== 'All Categories') {
       result = result.filter(toy => toy.category === selectedCategory);
     }
 
-    console.log("filtered:", result.length); // debugging
+    // console.log("filtered:", result.length); // debugging
     setFilteredToys(result);
   }, [searchQuery, selectedCategory, toys]);
 
-  // reset
+  // reset everything
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('All Categories');

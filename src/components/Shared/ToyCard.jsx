@@ -29,6 +29,16 @@ const ToyCard = ({ toy }) => {
         setLiked(!liked);
     };
 
+    /*
+    // simple card for testing
+    return (
+      <div className="card">
+        <img src={image} />
+        <h3>{name}</h3>
+      </div>
+    )
+    */
+
     return (
         <div className="card bg-base-100 shadow hover:shadow-lg transition">
             <figure className="px-4 pt-4 relative">
