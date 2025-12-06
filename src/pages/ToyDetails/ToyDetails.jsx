@@ -10,13 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Star, Heart, Package, User, ShoppingBag, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import toysData from '@/data/toys.json';
 import { z } from 'zod';
 
 const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
+
   comment: z.string().trim().max(500, "Comment cannot exceed 500 characters"),
 });
 
@@ -158,7 +157,6 @@ const ToyDetails = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50/30">
-      <Navbar />
 
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -365,8 +363,6 @@ const ToyDetails = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

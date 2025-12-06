@@ -7,40 +7,36 @@ import { Button } from '@/components/ui/button';
 import { Star, Package, Heart, ShoppingBag, User, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import toysData from '@/data/toys.json';
-
 const Favorites = () => {
-  const { currentUser, isAuthLoading } = useAuth();
+  const { user, loading } = useAuth();
   const { favorites: favoriteIds, removeFromFavorites } = useFavorites();
   const navigate = useNavigate();
 
   const [favoriteToys, setFavoriteToys] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     document.title = 'My Favorites | ToyTopia';
   }, []);
 
   useEffect(() => {
-    if (!isAuthLoading && !currentUser) {
-      setLoading(false);
+    if (!loading && !user) {
+      setDataLoading(false);
     }
-  }, [isAuthLoading, currentUser]);
+  }, [loading, user]);
 
   useEffect(() => {
-    if (currentUser) {
+    if (user) {
       try {
         const toys = toysData.toys.filter(toy => favoriteIds.map(fav => fav.toyId).includes(toy.id));
         setFavoriteToys(toys);
       } catch (error) {
         console.error("Failed to load favorites", error);
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     }
-  }, [favoriteIds, currentUser]);
+  }, [favoriteIds, user]);
 
   const handleRemoveFavorite = (e, toyId, toyName) => {
     e.stopPropagation();
@@ -49,14 +45,14 @@ const Favorites = () => {
     toast.success(`${toyName} removed from favorites`);
   };
 
-  if (isAuthLoading || loading) {
+  if (loading || dataLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading favorites...</div>;
   }
 
-  if (!currentUser) {
+  if (!user) {
     return (
       <div className="min-h-screen flex flex-col font-sans">
-        <Navbar />
+
         <main className="flex-1 container mx-auto px-4 py-20 flex flex-col items-center justify-center text-center">
           <Heart className="h-20 w-20 text-gray-200 mb-6" />
           <h1 className="text-3xl font-bold mb-4 text-gray-900">Your Favorites List</h1>
@@ -67,14 +63,14 @@ const Favorites = () => {
             Login Now
           </Button>
         </main>
-        <Footer />
+
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50/50">
-      <Navbar />
+
       <main className="flex-1 container mx-auto px-4 py-8 sm:py-12">
         <div className="mb-8 text-center">
           <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2">
@@ -164,7 +160,7 @@ const Favorites = () => {
           </div>
         )}
       </main>
-      <Footer />
+
     </div>
   );
 };

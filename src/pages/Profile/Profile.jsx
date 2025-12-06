@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -10,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 
 const Profile = () => {
+  // ... logic ...
+
+  // ... (keeping existing logic - wait, I need to keep the content)
   const { user, updateUserInfo, loading: authLoading, signOut } = useAuth();
   const { favorites: favoriteIds, removeFromFavorites } = useFavorites();
   const navigate = useNavigate();
@@ -116,7 +118,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50/50">
-      <Navbar />
 
       <main className="flex-1 container mx-auto px-4 py-8 sm:py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -302,7 +303,6 @@ const Profile = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

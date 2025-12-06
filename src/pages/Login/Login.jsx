@@ -7,11 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, Mail, Lock, Image, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 
-const Auth = () => {
+const Login = () => {
   const { signIn, signUp, signInWithGoogle, user, loading } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -67,7 +65,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50/50">
-      <Navbar />
+
       <div className="flex-1 flex items-center justify-center px-4 py-12 sm:py-20">
         <Card className="w-full max-w-md shadow-xl border-gray-100 bg-white/80 backdrop-blur-sm">
           <CardHeader className="text-center space-y-4">
@@ -261,9 +259,9 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
-      <Footer />
+
     </div>
   );
 };
 
-export default Auth;
+export default Login;

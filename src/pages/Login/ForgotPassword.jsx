@@ -6,8 +6,6 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, ArrowLeft, KeyRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 
 const ForgotPassword = () => {
@@ -42,7 +40,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gray-50/50">
-      <Navbar />
+
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md shadow-xl border-gray-100">
           <CardHeader className="text-center space-y-4">
@@ -120,7 +118,7 @@ const ForgotPassword = () => {
           </CardContent>
         </Card>
       </div>
-      <Footer />
+
     </div>
   );
 };

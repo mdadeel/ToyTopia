@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 
-const NotFound = () => {
+const ErrorPage = () => {
+  // ...
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 font-sans">
       <div className="text-center space-y-6 max-w-md w-full">
@@ -27,4 +28,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;
+export default ErrorPage;

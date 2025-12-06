@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import ModernToyCard from '@/components/ModernToyCard';
+import ModernToyCard from '@/components/Shared/ModernToyCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -28,7 +26,7 @@ const categories = [
   'Board Games'
 ];
 
-const Index = () => {
+const Home = () => {
   const toys = toysData.toys;
   const {
     filteredToys,
@@ -63,7 +61,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Navbar />
 
       {/* Hero Section */}
       <section className="bg-white border-b-4 border-primary">
@@ -357,10 +354,8 @@ const Index = () => {
           </div>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 };
 
-export default Index;
+export default Home;

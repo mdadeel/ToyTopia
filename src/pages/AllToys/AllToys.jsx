@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import ModernToyCard from '@/components/ModernToyCard';
+import ModernToyCard from '@/components/Shared/ModernToyCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,6 +23,7 @@ const categories = [
 ];
 
 const AllToys = () => {
+  // ...
   const toys = toysData.toys || [];
   const {
     filteredToys,
@@ -41,7 +40,6 @@ const AllToys = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <Navbar />
 
       <div className="bg-primary text-primary-foreground py-10 sm:py-16 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-10 opacity-10">
@@ -112,8 +110,6 @@ const AllToys = () => {
           </div>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 };
