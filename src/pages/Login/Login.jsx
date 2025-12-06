@@ -1,7 +1,7 @@
 ﻿import Lottie from "lottie-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "@/contexts/AuthContext";
+import { AuthContext } from "../../contexts/AuthContext";
 const Login = () => {
   const { userLogin, googleSign, user, loading } = useContext(AuthContext);
   const [error, setError] = useState("");

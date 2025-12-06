@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+// import { AuthContext } from "@/contexts/AuthContext"; // trying to fix import error
 import Main from "./Layout/Main";
 import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
