@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 const ToyCard = ({ toy }) => {
     const { id, name, description, price, image, category, rating } = toy;
     const { user } = useContext(AuthContext);

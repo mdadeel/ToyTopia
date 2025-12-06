@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 const ForgotPassword = () => {
   const { resetPassword } = useContext(AuthContext);

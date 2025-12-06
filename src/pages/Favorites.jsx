@@ -1,8 +1,8 @@
 import { useEffect, useState, useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import ToyCard from '@/components/Shared/ToyCard';
-import toysData from '@/data/toys.json';
+import ToyCard from '../components/ToyCard';
+import toysData from '../data/toys.json';
 const Favourites = () => {
   const { user, loading } = useContext(AuthContext);
   const navigate = useNavigate();

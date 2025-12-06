@@ -1,7 +1,8 @@
 import { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '@/contexts/AuthContext';
-import toysData from '@/data/toys.json';
+import { AuthContext } from '../contexts/AuthContext';
+import toysData from '../data/toys.json';
+// import axios from 'axios'; // tried to use but too complicated
 const ToyDetails = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);

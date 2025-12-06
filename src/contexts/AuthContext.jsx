@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { auth, googleProvider } from '@/config/firebase';
+import { auth, googleProvider } from '../config/firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -13,12 +13,20 @@ export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // added but not really used properly
 
   // monitor user status
   useEffect(() => {
+    console.log("checking auth..."); // forgot to remove this
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       // console.log("auth state:", currentUser?.email);
-      setUser(currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+        setError(null);
+      } else {
+        setUser(null);
+        // console.error("no user found"); // this was causing issues
+      }
       setLoading(false);
     });
     return () => {

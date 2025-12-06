@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import ToyCard from '@/components/Shared/ToyCard';
-import toysData from '@/data/toys.json';
+import ToyCard from '../components/ToyCard';
+import toysData from '../data/toys.json';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 const catagories = [

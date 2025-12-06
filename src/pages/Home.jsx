@@ -5,8 +5,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import toysData from '../../data/toys.json';
-import { AuthContext } from '../../contexts/AuthContext';
+import toysData from '../data/toys.json';
+import { AuthContext } from '../contexts/AuthContext';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 

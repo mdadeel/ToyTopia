@@ -2,15 +2,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 // import { AuthContext } from "@/contexts/AuthContext"; // trying to fix import error
 import Main from "./Layout/Main";
-import Home from "./pages/Home/Home";
-import Login from "./pages/Login/Login";
-import Register from "./pages/Login/Register";
-import Profile from "./pages/Profile/Profile";
-import ToyDetails from "./pages/ToyDetails/ToyDetails";
-import ErrorPage from "./pages/Error/ErrorPage";
-import Favourites from "./pages/Favorites/Favorites";
-import ForgotPassword from "./pages/Login/ForgotPassword";
-import AllToys from "./pages/AllToys/AllToys";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import ToyDetails from "./pages/ToyDetails";
+import ErrorPage from "./pages/ErrorPage";
+import Favourites from "./pages/Favorites";
+import ForgotPassword from "./pages/ForgotPassword";
+import AllToys from "./pages/AllToys";
 // import Test from './components/Test'; 
 
 const App = () => (

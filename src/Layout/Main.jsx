@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router-dom';
-import Navbar from '@/components/Shared/Navbar';
-import Footer from '@/components/Shared/Footer';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 import { ClimbingBoxLoader } from 'react-spinners';
 const Main = () => {
     const { loading } = useContext(AuthContext);

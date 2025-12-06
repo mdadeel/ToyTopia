@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
-import { AuthContext } from '@/contexts/AuthContext';
+import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import toysData from '@/data/toys.json';
+import toysData from '../data/toys.json';
 const Profile = () => {
   const { user, updateUserInfo, loading, signOut } = useContext(AuthContext);
   const navigate = useNavigate();
