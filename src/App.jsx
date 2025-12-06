@@ -13,25 +13,25 @@ import ForgotPassword from "./pages/ForgotPassword";
 import AllToys from "./pages/AllToys";
 // import Test from './components/Test'; 
 
-const App = () => (
-  // <RouterProvider router={router} />
-  <BrowserRouter>
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Main />}>
-          <Route index element={<Home />} />
-          <Route path="auth" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="favourites" element={<Favourites />} />
-          <Route path="all-toys" element={<AllToys />} />
-          <Route path="toy/:id" element={<ToyDetails />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-        </Route>
-        <Route path="*" element={<ErrorPage />} />
-      </Routes>
-    </AuthProvider>
-  </BrowserRouter>
-);
+const App = () => {
+  // tried nested routes but got confused, just doing it simple way
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Main><Home /></Main>} />
+          <Route path="/auth" element={<Main><Login /></Main>} />
+          <Route path="/register" element={<Main><Register /></Main>} />
+          <Route path="/profile" element={<Main><Profile /></Main>} />
+          <Route path="/favourites" element={<Main><Favourites /></Main>} />
+          <Route path="/all-toys" element={<Main><AllToys /></Main>} />
+          <Route path="/toy/:id" element={<Main><ToyDetails /></Main>} />
+          <Route path="/forgot-password" element={<Main><ForgotPassword /></Main>} />
+          <Route path="*" element={<ErrorPage />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+};
 
 export default App;

@@ -35,20 +35,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // create user function
-  // logic from firebase docs
-  const createuser = (name, email, password, photo) => {
+  // had issues with this, async/await seems easier than .then
+  const createuser = async (name, email, password, photo) => {
     setLoading(true);
-    return createUserWithEmailAndPassword(auth, email, password)
-      .then(result => {
-        // update profile after creation
-        return updateProfile(auth.currentUser, {
-          displayName: name,
-          photoURL: photo
-        })
-      })
-      .then(() => {
-        // console.log("updated")
-      })
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      // update profile
+      await updateProfile(auth.currentUser, {
+        displayName: name,
+        photoURL: photo
+      });
+      console.log("user created:", result.user.email);
+      setLoading(false); // forgot to add this initially
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      throw error; // re-throw so component can handle
+    }
   };
 
   // google signin

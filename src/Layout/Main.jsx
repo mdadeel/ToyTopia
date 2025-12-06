@@ -1,10 +1,9 @@
-import { Outlet } from 'react-router-dom';
+import { useContext } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { ClimbingBoxLoader } from 'react-spinners';
-const Main = () => {
+const Main = ({ children }) => {
     const { loading } = useContext(AuthContext);
 
     return (
@@ -21,7 +20,7 @@ const Main = () => {
                         />
                     </div>
                 ) : (
-                    <Outlet />
+                    children
                 )}
             </div>
             <Footer />
