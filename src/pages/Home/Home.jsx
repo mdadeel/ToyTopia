@@ -76,6 +76,10 @@ const Home = () => {
   };
 
   // TODO: add loader here
+  // const debugSearch = () => {
+  //   console.log(search)
+  // }
+
   const loadMore = () => {
     setShowCount(prev => prev + 8);
   };
@@ -89,7 +93,7 @@ const Home = () => {
             <div className="badge badge-primary mb-4">🇧🇩 No.1 Toy Shop in Bangladesh</div>
             <h1 className="text-4xl md:text-6xl font-extrabold mb-4">Welcome to <br /><span className="text-blue-600">ToyTopia</span></h1>
             <p className="max-w-2xl mb-6 text-gray-600 text-lg">Best toys for your kids. We delever all over Bangladesh. Cash on Delivery available! 🚚</p>
-            <button onClick={scrollToToys} className="btn btn-primary mr-3">Shop Now</button>
+            <button onClick={scrollToToys} className="btn btn-primary mr-3" style={{ borderRadius: '50px' }}>Shop Now</button>
             <button className="btn btn-outline">Call for Bulk</button>
 
             <div className="flex gap-8 mt-8">

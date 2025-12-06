@@ -10,7 +10,10 @@ import ErrorPage from "./pages/Error/ErrorPage";
 import Favourites from "./pages/Favorites/Favorites";
 import ForgotPassword from "./pages/Login/ForgotPassword";
 import AllToys from "./pages/AllToys/AllToys";
+// import Test from './components/Test'; 
+
 const App = () => (
+  // <RouterProvider router={router} />
   <BrowserRouter>
     <AuthProvider>
       <Routes>
