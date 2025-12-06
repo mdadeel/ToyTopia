@@ -14,7 +14,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const Profile = () => {
-  const { currentUser, updateUserInfo, isAuthLoading, signOut } = useAuth();
+  const { user, updateUserInfo, loading: authLoading, signOut } = useAuth();
   const { favorites: favoriteIds, removeFromFavorites } = useFavorites();
   const navigate = useNavigate();
 
@@ -33,17 +33,17 @@ const Profile = () => {
   }, []);
 
   useEffect(() => {
-    if (!isAuthLoading && !currentUser) {
+    if (!authLoading && !user) {
       navigate('/auth');
     }
-  }, [currentUser, isAuthLoading, navigate]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         // Load user reviews from local storage (mock DB)
         const allReviews = JSON.parse(localStorage.getItem('reviews') || '[]');
-        const userReviews = allReviews.filter(review => review.userId === currentUser.uid);
+        const userReviews = allReviews.filter(review => review.userId === user.uid);
         setReviews(userReviews);
 
         // Load favorites details
@@ -57,12 +57,12 @@ const Profile = () => {
       }
     };
 
-    if (currentUser) {
-      setName(currentUser.displayName || '');
-      setPhotoURL(currentUser.photoURL || '');
+    if (user) {
+      setName(user.displayName || '');
+      setPhotoURL(user.photoURL || '');
       fetchUserData();
     }
-  }, [currentUser, favoriteIds]);
+  }, [user, favoriteIds]);
 
   const handleSaveProfile = async () => {
     if (!name.trim()) {
@@ -110,7 +110,7 @@ const Profile = () => {
     }
   };
 
-  if (isAuthLoading || loading) {
+  if (authLoading || loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading profile...</div>;
   }
 
@@ -128,9 +128,9 @@ const Profile = () => {
               <CardContent className="pt-0 relative px-6">
                 <div className="flex justify-center -mt-12 mb-4">
                   <Avatar className="h-24 w-24 border-4 border-white shadow-sm bg-white">
-                    <AvatarImage src={photoURL || currentUser?.photoURL} alt="Profile" />
+                    <AvatarImage src={photoURL || user?.photoURL} alt="Profile" />
                     <AvatarFallback className="bg-gray-100 text-gray-500 text-2xl font-bold">
-                      {(name || currentUser?.displayName)?.charAt(0)?.toUpperCase() || 'U'}
+                      {(name || user?.displayName)?.charAt(0)?.toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                 </div>
@@ -152,8 +152,8 @@ const Profile = () => {
                         </Button>
                         <Button variant="outline" onClick={() => {
                           setEditing(false);
-                          setName(currentUser.displayName || '');
-                          setPhotoURL(currentUser.photoURL || '');
+                          setName(user.displayName || '');
+                          setPhotoURL(user.photoURL || '');
                         }} disabled={saving}>
                           Cancel
                         </Button>
@@ -161,8 +161,8 @@ const Profile = () => {
                     </div>
                   ) : (
                     <>
-                      <h2 className="text-xl font-bold text-gray-900">{name || currentUser?.displayName || 'User'}</h2>
-                      <p className="text-sm text-gray-500 mb-4">{currentUser?.email}</p>
+                      <h2 className="text-xl font-bold text-gray-900">{name || user?.displayName || 'User'}</h2>
+                      <p className="text-sm text-gray-500 mb-4">{user?.email}</p>
 
                       <div className="flex justify-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
@@ -180,7 +180,7 @@ const Profile = () => {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between text-sm py-1">
                     <span className="text-gray-500">Member Since</span>
-                    <span className="font-medium">{new Date(currentUser?.metadata?.creationTime).toLocaleDateString()}</span>
+                    <span className="font-medium">{new Date(user?.metadata?.creationTime).toLocaleDateString()}</span>
                   </div>
                   <div className="flex justify-between text-sm py-1">
                     <span className="text-gray-500">Total Reviews</span>

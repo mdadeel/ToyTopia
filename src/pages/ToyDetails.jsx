@@ -22,7 +22,7 @@ const reviewSchema = z.object({
 
 const ToyDetails = () => {
   const { id } = useParams();
-  const { currentUser } = useAuth();
+  const { user } = useAuth();
   const { isFavorite: isToyFavorite, addToFavorites, removeFromFavorites } = useFavorites();
   const navigate = useNavigate();
 
@@ -65,7 +65,7 @@ const ToyDetails = () => {
   }, [isToyFavorite, id]);
 
   const handleFavoriteToggle = () => {
-    if (!currentUser) {
+    if (!user) {
       toast.error("Please login to save favorites");
       navigate('/auth');
       return;
@@ -82,7 +82,7 @@ const ToyDetails = () => {
   };
 
   const handleReviewSubmit = () => {
-    if (!currentUser) {
+    if (!user) {
       toast.error("Please login to review");
       navigate('/auth');
       return;
@@ -105,8 +105,8 @@ const ToyDetails = () => {
         const newReview = {
           id: `review-${Date.now()}`,
           toyId: id,
-          userId: currentUser.uid,
-          userEmail: currentUser.email,
+          userId: user.uid,
+          userEmail: user.email,
           rating,
           comment,
           createdAt: new Date().toISOString()
@@ -279,7 +279,7 @@ const ToyDetails = () => {
                 <Badge variant="secondary" className="rounded-full px-2">{reviews.length}</Badge>
               </h3>
 
-              {currentUser ? (
+              {user ? (
                 <div className="bg-gray-50 p-6 rounded-xl mb-8">
                   <h4 className="font-bold text-sm uppercase text-gray-500 mb-4">
                     {editingReviewId ? 'Edit your review' : 'Write a review'}
@@ -341,7 +341,7 @@ const ToyDetails = () => {
                             </div>
                           </div>
                         </div>
-                        {currentUser?.uid === review.userId && (
+                        {user?.uid === review.userId && (
                           <div className="flex gap-1">
                             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
                               setEditingReviewId(review.id);

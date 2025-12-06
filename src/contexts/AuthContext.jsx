@@ -14,101 +14,102 @@ import { toast } from 'sonner';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Monitor auth state changes
+  // Observer for user state
   useEffect(() => {
-    if (!auth) {
-      console.error("Firebase auth not configured");
-      setIsAuthLoading(false);
-      return;
-    }
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setIsAuthLoading(false);
+    const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+      // console.log("User state changed:", currentUser);
     });
-    return () => unsubscribe();
+    return () => unSubscribe();
   }, []);
 
-  const signUp = async (email, password, fullName, photoURL) => {
-    if (!auth) return;
+  // Create User
+  const signUp = async (email, password, name, photo) => {
+    setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      if (fullName || photoURL) {
-        await firebaseUpdateProfile(userCredential.user, {
-          displayName: fullName,
-          photoURL: photoURL || null
-        });
-      }
-      toast.success("Account created successfully!");
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      // update profile
+      await firebaseUpdateProfile(result.user, {
+        displayName: name,
+        photoURL: photo
+      });
+      toast.success("Account created!");
     } catch (error) {
+      console.error(error);
       toast.error(error.message);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Login User
   const signIn = async (email, password) => {
-    if (!auth) return;
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Welcome back!");
+      toast.success("Logged in successfully");
     } catch (error) {
-      toast.error("Invalid email or password.");
+      console.log(error);
+      toast.error("Email or Password doesn't match");
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Google Login
   const signInWithGoogle = async () => {
-    if (!auth) return;
+    setLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      setCurrentUser(result.user);
-      toast.success("Successfully signed in with Google.");
+      setUser(result.user);
+      toast.success("Google Login Successful");
     } catch (error) {
+      console.error(error);
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Logout
   const signOut = async () => {
-    if (!auth) return;
-    try {
-      await firebaseSignOut(auth);
-      toast.success("See you soon!");
-    } catch (error) {
-      toast.error("Error signing out.");
-    }
+    setLoading(true);
+    return firebaseSignOut(auth).then(() => {
+      toast.success("Logged out");
+      setLoading(false);
+    });
   };
 
-  const updateUserInfo = async (name, photoURL) => {
-    if (!auth.currentUser) return;
-    try {
-      await firebaseUpdateProfile(auth.currentUser, {
-        displayName: name,
-        photoURL: photoURL
+  // Update Profile Info
+  const updateUserInfo = async (name, photo) => {
+    return firebaseUpdateProfile(auth.currentUser, {
+      displayName: name,
+      photoURL: photo
+    })
+      .then(() => {
+        toast.success("Profile Updated");
+        // force refresh user
+        setUser({ ...auth.currentUser });
+      })
+      .catch((error) => {
+        console.log(error);
       });
-      await auth.currentUser.reload();
-      setCurrentUser({ ...auth.currentUser });
-      toast.success("Profile updated successfully!");
-    } catch (error) {
-      toast.error("Failed to update profile.");
-    }
   };
 
-  const resetPassword = async (email) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast.success("Password reset email sent.");
-      return true;
-    } catch (error) {
-      toast.error(error.message);
-      return false;
-    }
+  // Reset Pass
+  const resetPassword = (email) => {
+    return sendPasswordResetEmail(auth, email);
   };
 
-  const value = {
-    currentUser,
-    isAuthLoading,
+  const authInfo = {
+    user,
+    loading,
     signUp,
     signIn,
     signInWithGoogle,
@@ -118,16 +119,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {!isAuthLoading && children}
+    <AuthContext.Provider value={authInfo}>
+      {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return useContext(AuthContext);
 };

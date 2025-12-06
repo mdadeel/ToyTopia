@@ -1,60 +1,50 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useFavorites = () => {
   const { user } = useAuth();
   const [favorites, setFavorites] = useState([]);
 
-  const loadFavorites = useCallback(() => {
-    if (!user) {
-      setFavorites([]);
-      return;
-    }
-    try {
+  // Load favorites when user changes
+  useEffect(() => {
+    if (user) {
       const stored = localStorage.getItem(`favorites_${user.uid}`);
-      const parsed = stored ? JSON.parse(stored) : [];
-      setFavorites(parsed);
-    } catch (error) {
-      console.error("Failed to parse favorites", error);
+      if (stored) {
+        setFavorites(JSON.parse(stored));
+      } else {
+        setFavorites([]);
+      }
+    } else {
       setFavorites([]);
     }
   }, [user]);
 
-  useEffect(() => {
-    loadFavorites();
-  }, [loadFavorites]);
-
+  // Add Item
   const addToFavorites = (toyId) => {
-    if (!user) return false;
-
-    const newFav = {
-      toyId,
-      userId: user.uid,
-      addedAt: new Date().toISOString()
-    };
-
-    const updated = [...favorites, newFav];
-    localStorage.setItem(`favorites_${user.uid}`, JSON.stringify(updated));
-    setFavorites(updated);
-    return true;
+    if (!user) return;
+    const newFav = { toyId, userId: user.uid, date: new Date() };
+    const newList = [...favorites, newFav];
+    localStorage.setItem(`favorites_${user.uid}`, JSON.stringify(newList));
+    setFavorites(newList);
   };
 
+  // Remove Item
   const removeFromFavorites = (toyId) => {
-    if (!user) return false;
-
-    const updated = favorites.filter(fav => fav.toyId !== toyId);
-    localStorage.setItem(`favorites_${user.uid}`, JSON.stringify(updated));
-    setFavorites(updated);
-    return true;
+    if (!user) return;
+    const newList = favorites.filter(item => item.toyId !== toyId);
+    localStorage.setItem(`favorites_${user.uid}`, JSON.stringify(newList));
+    setFavorites(newList);
   };
 
-  const isFavorite = (toyId) => favorites.some(fav => fav.toyId === toyId);
+  // Check if exists
+  const isFavorite = (toyId) => {
+    return favorites.find(item => item.toyId === toyId);
+  };
 
   return {
     favorites,
     addToFavorites,
     removeFromFavorites,
-    isFavorite,
-    loadFavorites
+    isFavorite
   };
 };

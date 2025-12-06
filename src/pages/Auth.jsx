@@ -12,7 +12,7 @@ import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 
 const Auth = () => {
-  const { signIn, signUp, signInWithGoogle, currentUser, isAuthLoading } = useAuth();
+  const { signIn, signUp, signInWithGoogle, user, loading } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
@@ -30,10 +30,10 @@ const Auth = () => {
   }, []);
 
   useEffect(() => {
-    if (!isAuthLoading && currentUser) {
+    if (!loading && user) {
       navigate('/profile');
     }
-  }, [currentUser, isAuthLoading, navigate]);
+  }, [user, loading, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

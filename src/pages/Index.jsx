@@ -48,6 +48,7 @@ const Index = () => {
     setVisibleToysCount(8);
   }, [searchQuery, selectedCategory]);
 
+  // Scroll to toys
   const scrollToToys = () => {
     const toysSection = document.getElementById('toys-section');
     if (toysSection) {
@@ -55,6 +56,7 @@ const Index = () => {
     }
   };
 
+  // Bulk Order Info
   const handleCallOrder = () => {
     toast.info("Call us at 01700000000 for bulk orders!");
   };
