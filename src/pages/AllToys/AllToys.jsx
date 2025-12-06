@@ -1,115 +1,103 @@
-import { useEffect } from 'react';
-import ModernToyCard from '@/components/Shared/ModernToyCard';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, Rocket } from 'lucide-react';
-import { useToyFilter } from '@/hooks/useToyFilter';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import ToyCard from '@/components/Shared/ToyCard';
 import toysData from '@/data/toys.json';
-
-const categories = [
-  'All Categories',
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+const catagories = [
+  'All Catagories',
   'Building Blocks',
-  'Plush',
   'Stuffed Animals',
   'Puzzles',
   'Arts & Crafts',
-  'Vehicles & Playsets',
   'Action Figures',
   'Educational',
-  'Musical Instruments',
   'Outdoor',
   'Board Games'
 ];
 
 const AllToys = () => {
-  // ...
   const toys = toysData.toys || [];
-  const {
-    filteredToys,
-    searchQuery,
-    setSearchQuery,
-    selectedCategory,
-    setSelectedCategory,
-    resetFilters
-  } = useToyFilter(toys);
+  const location = useLocation();
+
+  const [search, setSearch] = useState('');
+  const [catagory, setCatagory] = useState('All Catagories');
+  const [sort, setSort] = useState('');
+
+  let filteredToys = [...toys];
+
+  if (search) {
+    let q = search.toLowerCase();
+    filteredToys = filteredToys.filter(toy => {
+      let nameMatch = toy.name.toLowerCase().includes(q);
+      let descMatch = toy.description && toy.description.toLowerCase().includes(q);
+      return nameMatch || descMatch;
+    });
+  }
+
+  if (catagory !== 'All Catagories') {
+    filteredToys = filteredToys.filter(toy => toy.category === catagory);
+  }
+
+  if (sort === 'to low') {
+    filteredToys.sort((a, b) => b.price - a.price);
+  } else if (sort === 'to high') {
+    filteredToys.sort((a, b) => a.price - b.price);
+  }
+
+  console.log("total filtered:", filteredToys.length)
 
   useEffect(() => {
-    document.title = 'All Toys | ToyTopia';
-  }, []);
+    window.scrollTo(0, 0);
+    document.title = "ToyTopia || All Toys";
+    AOS.init({ duration: 1000 });
+  }, [location]);
+
+  const clearFilters = () => {
+    setSearch('');
+    setCatagory('All Catagories');
+    setSort('');
+  };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
-
-      <div className="bg-primary text-primary-foreground py-10 sm:py-16 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-10 opacity-10">
-          <Rocket className="h-64 w-64 transform rotate-45" />
-        </div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-3xl sm:text-5xl font-black mb-4">Discover Amazing Toys</h1>
-          <p className="text-primary-foreground/80 text-lg max-w-xl mx-auto">
-            Browse our curated collection of {toys.length}+ educational and fun toys for every age group.
-          </p>
+    <div className="min-h-screen">
+      <div className="bg-blue-600 text-white py-12" data-aos="fade-down">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl font-bold mb-4">All Toys</h1>
+          <p className="text-blue-100">Browse our collection of {toys.length}+ quality toys</p>
         </div>
       </div>
 
-      <main className="flex-1 container mx-auto px-4 py-8 sm:py-12">
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8 sticky top-20 z-10 backdrop-blur-xl bg-white/90">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search toys by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 sm:h-12"
-              />
-            </div>
-            <div className="relative w-full md:w-64">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="h-10 sm:h-12 w-full">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row gap-4 justify-center mb-8">
+          <input type="search" placeholder="Search toys..." value={search} onChange={(e) => setSearch(e.target.value)} className="input input-bordered w-full md:w-1/3" />
+          <select value={catagory} onChange={(e) => setCatagory(e.target.value)} className="select select-bordered w-full md:w-48">
+            {catagories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
+          </select>
+          <select value={sort} onChange={(e) => setSort(e.target.value)} className="select select-bordered w-full md:w-48">
+            <option value="">Sort by price</option>
+            <option value="to low">High to Low</option>
+            <option value="to high">Low to High</option>
+          </select>
         </div>
 
-        <div className="mb-6 flex items-center justify-between">
-          <p className="text-gray-500 font-medium">
-            Showing {filteredToys.length} results
-          </p>
-          {(searchQuery || selectedCategory !== 'All Categories') && (
-            <Button variant="link" onClick={resetFilters} className="text-destructive h-auto p-0">
-              Clear Filters
-            </Button>
-          )}
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-gray-600">Showing {filteredToys.length} results</p>
+          {(search || catagory !== 'All Catagories' || sort) && (<button onClick={clearFilters} className="btn btn-ghost btn-sm text-red-500">Clear Filters</button>)}
         </div>
 
         {filteredToys.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No toys found</h3>
-            <p className="text-gray-500 mb-6">Try adjusting your filters or search terms</p>
-            <Button onClick={resetFilters} variant="outline">
-              View All Toys
-            </Button>
+          <div className="text-center py-20">
+            <h3 className="text-xl font-bold mb-2">No toys found</h3>
+            <p className="text-gray-500 mb-4">Try different search or filter</p>
+            <button onClick={clearFilters} className="btn btn-outline">View All Toys</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredToys.map((toy) => (
-              <ModernToyCard key={toy.id} toy={toy} />
-            ))}
+            {filteredToys.map((toy) => (<ToyCard key={toy.id} toy={toy} />))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };

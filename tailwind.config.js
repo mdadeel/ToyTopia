@@ -1,5 +1,6 @@
-// tailwind config
+
 import tailwindcssAnimate from "tailwindcss-animate";
+import daisyui from "daisyui";
 
 export default {
   darkMode: ["class"],
@@ -56,6 +57,10 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  // using both for smooth transition
+  plugins: [tailwindcssAnimate, daisyui],
+  daisyui: {
+    themes: ["light"],
+  },
 };
 

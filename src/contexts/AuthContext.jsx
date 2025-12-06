@@ -6,103 +6,56 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  updateProfile as firebaseUpdateProfile,
+  updateProfile,
   sendPasswordResetEmail
 } from 'firebase/auth';
-import { toast } from 'sonner';
-
-const AuthContext = createContext(null);
-
+export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Observer for user state
   useEffect(() => {
-    const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("auth state:", currentUser?.email);
       setUser(currentUser);
       setLoading(false);
-      // console.log("User state changed:", currentUser);
     });
-    return () => unSubscribe();
+    return () => unsubscribe();
   }, []);
 
-  // Create User
-  const signUp = async (email, password, name, photo) => {
+  const createuser = async (name, email, password, photo) => {
     setLoading(true);
-    try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      // update profile
-      await firebaseUpdateProfile(result.user, {
-        displayName: name,
-        photoURL: photo
-      });
-      toast.success("Account created!");
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Login User
-  const signIn = async (email, password) => {
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Logged in successfully");
-    } catch (error) {
-      console.log(error);
-      toast.error("Email or Password doesn't match");
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Google Login
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      setUser(result.user);
-      toast.success("Google Login Successful");
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Logout
-  const signOut = async () => {
-    setLoading(true);
-    return firebaseSignOut(auth).then(() => {
-      toast.success("Logged out");
-      setLoading(false);
-    });
-  };
-
-  // Update Profile Info
-  const updateUserInfo = async (name, photo) => {
-    return firebaseUpdateProfile(auth.currentUser, {
+    const createUser = await createUserWithEmailAndPassword(auth, email, password);
+    const update = await updateProfile(auth.currentUser, {
       displayName: name,
       photoURL: photo
-    })
-      .then(() => {
-        toast.success("Profile Updated");
-        // force refresh user
-        setUser({ ...auth.currentUser });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    });
+    console.log(update)
+    return createUser;
   };
 
-  // Reset Pass
+  const googleSign = () => {
+    setLoading(true);
+    return signInWithPopup(auth, googleProvider);
+  };
+
+  const userSign = (email, password) => {
+    setLoading(true);
+    return signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const signOut = () => {
+    return firebaseSignOut(auth);
+  };
+
+  const updateUserInfo = async (name, photo) => {
+    await updateProfile(auth.currentUser, {
+      displayName: name,
+      photoURL: photo
+    });
+    setUser({ ...auth.currentUser });
+  };
+
   const resetPassword = (email) => {
     return sendPasswordResetEmail(auth, email);
   };
@@ -110,9 +63,9 @@ export const AuthProvider = ({ children }) => {
   const authInfo = {
     user,
     loading,
-    signUp,
-    signIn,
-    signInWithGoogle,
+    createuser,
+    googleSign,
+    userSign,
     signOut,
     updateUserInfo,
     resetPassword

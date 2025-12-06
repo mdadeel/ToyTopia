@@ -1,155 +1,59 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { User, LogOut, Menu, X } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
+import logo from '/logo.png';
 const Navbar = () => {
-  const { user, signOut } = useAuth();
-  const location = useLocation();
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useContext(AuthContext);
+  const navigate = useNavigate();
+  console.log(user)
 
-  // Active link handler
-  const isActive = (path) => location.pathname === path;
+  const handleLogout = () => {
+    signOut()
+      .then()
+      .catch(error => console.log(error))
+    navigate("/")
+  }
 
-  const links = [
-    { path: '/', label: 'Home' },
-    { path: '/all-toys', label: 'All Toys' },
-    { path: '/favorites', label: 'Favorites' },
-    { path: '/profile', label: 'Profile' }
-  ];
+  const menuItems = <>
+    <li><NavLink to="/" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>Home</NavLink></li>
+    <li><NavLink to="/all-toys" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>All Toys</NavLink></li>
+    {user && <li><NavLink to="/favourites" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>Favourites</NavLink></li>}
+    {user && <li><NavLink to="/profile" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>My Profile</NavLink></li>}
+  </>
 
-  // Smart navbar hide on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      setLastScrollY(currentScrollY);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
-
-  const getUserDisplayName = () => {
-    if (!user) return 'Guest';
-    if (user.displayName) return user.displayName.split(' ')[0];
-    return user.email?.split('@')[0] || 'Friend';
-  };
+  const userInfo = <div className="ml-auto dropdown dropdown-end">
+    <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+      <div className="w-10 rounded-full"><img src={user?.photoURL || 'https://i.ibb.co/ZYW3VTp/brown-brim.png'} /></div>
+    </label>
+    <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+      <li className="text-center font-bold py-2">{user?.displayName}</li>
+      <li><Link to="/profile" className="justify-between">My Profile</Link></li>
+      <li><Link to="/favourites">Favourites</Link></li>
+      <li onClick={handleLogout}><a>Logout</a></li>
+    </ul>
+  </div>
 
   return (
-    <nav className={`sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 transition-all duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 group">
-            <img src="/logo.png" alt="ToyTopia" className="h-8 w-8 transition-transform group-hover:scale-105" />
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              ToyTopia
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            {links.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-primary ${isActive(link.path) ? 'text-primary' : 'text-gray-600'}`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          <div className="hidden md:flex items-center gap-4">
-            {user ? (
-              <div className="flex items-center gap-4">
-                <Link to="/profile" className="flex items-center gap-2 hover:bg-gray-50 p-1.5 rounded-full transition-colors pr-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border border-gray-100">
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
-                    ) : (
-                      user.email?.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <span className="font-medium text-gray-700 text-sm">
-                    Hi, {getUserDisplayName()}
-                  </span>
-                </Link>
-                <Button onClick={signOut} variant="ghost" size="sm" className="text-gray-500 hover:text-destructive">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              </div>
-            ) : (
-              <Link to="/auth">
-                <Button size="sm" className="px-6">
-                  Login
-                </Button>
-              </Link>
-            )}
-          </div>
-
-          <button
-            className="md:hidden p-2 text-gray-600"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+    <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
+      <div className="navbar-start">
+        <div className="dropdown">
+          <label tabIndex={0} className="btn btn-ghost lg:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+          </label>
+          <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">{menuItems}</ul>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100 animate-in slide-in-from-top-2">
-            <div className="flex flex-col gap-2">
-              {links.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`px-4 py-3 rounded-lg font-medium text-sm transition-colors ${isActive(link.path) ? 'bg-primary/5 text-primary' : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="h-px bg-gray-100 my-2" />
-              {user ? (
-                <>
-                  <Link
-                    to="/profile"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
-                  >
-                    <User className="h-4 w-4" />
-                    Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      signOut();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/5 rounded-lg w-full text-left"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="px-4">
-                  <Button className="w-full">Login</Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
+        <Link to="/" className="flex items-center gap-2">
+          <img src={logo} alt="ToyTopia" className="w-8 h-8" />
+          <span className="btn btn-ghost normal-case text-xl font-bold text-blue-600">ToyTopia</span>
+        </Link>
       </div>
-    </nav>
+      <div className="navbar-center hidden lg:flex">
+        <ul className="menu menu-horizontal px-1 font-medium">{menuItems}</ul>
+      </div>
+      <div className="navbar-end">
+        {user ? userInfo : <Link className="btn btn-primary" to="/auth">Login</Link>}
+      </div>
+    </div>
   );
 };
 

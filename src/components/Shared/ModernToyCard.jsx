@@ -1,7 +1,9 @@
+// toy card component
+// this shows single toy in grid
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Eye, ShoppingBag, Heart } from 'lucide-react';
+import { Star, Eye, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -9,24 +11,27 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const ModernToyCard = ({ toy }) => {
-  const { id, name, description, price, image, category, rating = 0 } = toy;
+  const { id, name, description, price, image, category, rating } = toy;
+
   const { user } = useAuth();
   const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
-  const [isFav, setIsFav] = useState(false);
+
+  // for heart icon
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
-    setIsFav(isFavorite(id));
+    setLiked(isFavorite(id));
   }, [isFavorite, id]);
 
-  const handleFavoriteToggle = () => {
+  // toggle favorite
+  const handleLike = () => {
     if (!user) {
-      toast.error("Please login to save favorites");
+      toast.error("Please login first");
       return;
     }
-
     if (isFavorite(id)) {
       removeFromFavorites(id);
-      toast.success("Removed from favorites");
+      toast.success("Removed");
     } else {
       addToFavorites(id);
       toast.success("Added to favorites");
@@ -34,63 +39,60 @@ const ModernToyCard = ({ toy }) => {
   };
 
   return (
-    <Card className="group rounded-xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full bg-white">
-      <div className="aspect-square overflow-hidden bg-gray-50 relative">
+    <Card className="group rounded-xl border overflow-hidden hover:shadow-lg transition flex flex-col h-full bg-white">
+      {/* img */}
+      <div className="aspect-square overflow-hidden bg-gray-100 relative">
         {image ? (
           <img
             src={image}
             alt={name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="h-full w-full object-cover group-hover:scale-105 transition"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-gray-300">
-            <ShoppingBag className="h-16 w-16" />
+            No Image
           </div>
         )}
-        {/* Quick action overlay could go here */}
       </div>
 
-      <div className="p-5 space-y-3 flex-grow flex flex-col">
-        <div className="flex justify-between items-start gap-2">
+      {/* content */}
+      <div className="p-4 space-y-2 flex-grow flex flex-col">
+        <div className="flex justify-between items-center">
           {category && (
-            <Badge variant="secondary" className="text-xs font-normal">
+            <Badge variant="secondary" className="text-xs">
               {category}
             </Badge>
           )}
           {rating > 0 && (
-            <div className="flex items-center gap-1 text-xs font-medium text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-1 text-xs text-amber-500">
               <Star className="h-3 w-3 fill-current" />
-              {rating.toFixed(1)}
+              {rating}
             </div>
           )}
         </div>
 
         <div>
-          <h3 className="font-bold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
-            {name}
-          </h3>
-          <p className="text-sm text-gray-500 line-clamp-2 mt-1">
-            {description}
-          </p>
+          <h3 className="font-bold text-gray-900 line-clamp-1">{name}</h3>
+          <p className="text-sm text-gray-500 line-clamp-2">{description}</p>
         </div>
 
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-          <span className="text-lg font-bold text-primary">
-            ${price.toFixed(2)}
+        {/* price and btns */}
+        <div className="flex items-center justify-between mt-auto pt-3 border-t">
+          <span className="text-lg font-bold text-blue-600">
+            ${price}
           </span>
 
           <div className="flex items-center gap-2">
             <button
-              onClick={handleFavoriteToggle}
-              className={`p-2 rounded-full transition-colors ${isFav ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
-                }`}
+              onClick={handleLike}
+              className={`p-2 rounded-full transition ${liked ? 'bg-red-100 text-red-500' : 'bg-gray-100 text-gray-400'}`}
             >
-              <Heart className={`h-4 w-4 ${isFav ? 'fill-current' : ''}`} />
+              <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
             </button>
 
             <Link to={`/toy/${id}`}>
-              <Button size="sm" variant="default" className="text-xs px-4 h-9">
-                <Eye className="h-3.5 w-3.5 mr-1.5" />
+              <Button size="sm" className="text-xs">
+                <Eye className="h-3 w-3 mr-1" />
                 View
               </Button>
             </Link>
