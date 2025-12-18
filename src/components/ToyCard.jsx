@@ -1,32 +1,62 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+
+// Beginner-style card with clearer variable names and extra comments
 const ToyCard = ({ toy }) => {
+    // pull out toy fields we care about
     const { id, name, description, price, image, category, rating } = toy;
     const { user } = useContext(AuthContext);
 
-    const [liked, setLiked] = useState(false);
+    // track if current user liked this toy
+    const [isToyLikedByCurrentUser, setIsToyLikedByCurrentUser] = useState(false);
 
+    // small helper: get favourites list from localStorage (simple approach)
+    const getFavouriteIds = () => {
+        // I am keeping it simple and forgiving here
+        const raw = localStorage.getItem('favourites');
+        return raw ? JSON.parse(raw) : [];
+    };
+
+    // small helper: write favourites list back
+    const saveFavouriteIds = (ids) => {
+        // writing directly is fine for this demo
+        localStorage.setItem('favourites', JSON.stringify(ids));
+    };
+
+    // when the component loads or the toy id changes, check liked state
     useEffect(() => {
-        const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-        setLiked(favs.includes(id));
+        const favouriteIds = getFavouriteIds();
+        const alreadyLiked = favouriteIds.includes(id);
+        setIsToyLikedByCurrentUser(alreadyLiked);
     }, [id]);
 
+    // toggle like: show an alert if user is not logged in
     const handleLike = () => {
         if (!user) {
             alert("Please login first");
             return;
         }
-        let favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-        if (favs.includes(id)) {
-            favs = favs.filter(f => f !== id);
-            console.log("removed from favs")
+
+        // read favourites (beginner style: a couple of intermediate variables)
+        const favouriteIdsBefore = getFavouriteIds();
+        let favouriteIdsAfter = [...favouriteIdsBefore];
+
+        if (favouriteIdsAfter.includes(id)) {
+            // remove this id
+            favouriteIdsAfter = favouriteIdsAfter.filter((favouriteToyId) => favouriteToyId !== id);
+            console.log("removed from favourites");
         } else {
-            favs.push(id);
-            console.log("added to favs")
+            // add this id
+            favouriteIdsAfter.push(id);
+            console.log("added to favourites");
         }
-        localStorage.setItem('favourites', JSON.stringify(favs));
-        setLiked(!liked);
+
+        // save changes
+        saveFavouriteIds(favouriteIdsAfter);
+
+        // update local UI state (beginner approach: derive next state with !)
+        setIsToyLikedByCurrentUser(!isToyLikedByCurrentUser);
     };
 
     /*
@@ -43,7 +73,8 @@ const ToyCard = ({ toy }) => {
         <div className="card bg-base-100 shadow hover:shadow-lg transition">
             <figure className="px-4 pt-4 relative">
                 {image ? (<img src={image} alt={name} className="rounded-xl h-48 w-full object-cover" />) : (<div className="rounded-xl h-48 w-full bg-gray-200 flex items-center justify-center">No Image</div>)}
-                <button onClick={handleLike} className={`btn btn-circle btn-sm absolute top-6 right-6 ${liked ? 'btn-error' : 'btn-ghost bg-white'}`}>{liked ? '❤️' : '🤍'}</button>
+                {/* like button (simple toggle) */}
+                <button onClick={handleLike} className={`btn btn-circle btn-sm absolute top-6 right-6 ${isToyLikedByCurrentUser ? 'btn-error' : 'btn-ghost bg-white'}`}>{isToyLikedByCurrentUser ? '❤️' : '🤍'}</button>
             </figure>
 
             <div className="card-body p-4">

@@ -1,9 +1,14 @@
+// allToys page - shows all products with filter options
+// spent like 2 hours on the filters ughhh finally working
+
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import ToyCard from '../components/ToyCard';
 import toysData from '../data/toys.json';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+
+// keeping spelling as catagories cuz changing it breaks stuff
 const catagories = [
   'All Catagories',
   'Building Blocks',
@@ -17,15 +22,17 @@ const catagories = [
 ];
 
 const AllToys = () => {
-  const toys = toysData.toys || [];
+  var toys = toysData.toys || []; // using var here, let was acting weird earlier
   const location = useLocation();
 
   const [search, setSearch] = useState('');
   const [catagory, setCatagory] = useState('All Catagories');
   const [sort, setSort] = useState('');
 
+  // making a copy so original array doesnt get mutated (learned this the hard way lol)
   let filteredToys = [...toys];
 
+  // search filter - lowrcase for case insensitive matching
   if (search) {
     let q = search.toLowerCase();
     filteredToys = filteredToys.filter(toy => {
@@ -35,10 +42,13 @@ const AllToys = () => {
     });
   }
 
+  // catagory filter
   if (catagory !== 'All Catagories') {
     filteredToys = filteredToys.filter(toy => toy.category === catagory);
   }
 
+  // sorting - kinda works but sometimes feels buggy idk
+  // tried using localeCompare for alphabetical but nah too complicated
   if (sort === 'to low') {
     filteredToys.sort((a, b) => b.price - a.price);
   } else if (sort === 'to high') {

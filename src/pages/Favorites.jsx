@@ -1,33 +1,42 @@
+// favourites page - users can save toys they like
+// using localStorage for now, maybe firebase later if we need sync across devices
+// TODO: add "clear all favourites" button
+
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import ToyCard from '../components/ToyCard';
 import toysData from '../data/toys.json';
+
 const Favourites = () => {
   const { user, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
   const [favouriteToys, setFavouriteToys] = useState([]);
-  const [dataLoading, setDataLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true); // extra loading state for favs data
 
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "ToyTopia || Favourites";
   }, [location]);
 
+  // if user not logged in, stop loading
   useEffect(() => {
     if (!loading && !user) {
       setDataLoading(false);
     }
   }, [loading, user]);
 
+  // load favourites from localStorage when user is available
   useEffect(() => {
     if (user) {
+      // localStorage theke favs gula niye aschi
       const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
       const toys = toysData.toys.filter(toy => favs.includes(toy.id));
       setFavouriteToys(toys);
       setDataLoading(false);
+      // console.log("found these favs:", favs);
       console.log("favs loaded:", toys.length)
     }
   }, [user]);
