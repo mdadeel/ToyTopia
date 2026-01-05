@@ -2,7 +2,7 @@ import React from 'react';
 
 const Section = ({ children, title, subtitle, className = '', containerClassName = '', ...props }) => {
     return (
-        <section className={`py-16 md:py-24 px-4 ${className}`} {...props}>
+        <section className={`py-16 md:py-16 px-4 ${className}`} {...props}>
             <div className={`max-w-7xl mx-auto ${containerClassName}`}>
                 {(title || subtitle) && (
                     <div className="text-center mb-12 md:mb-16">

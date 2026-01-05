@@ -2,9 +2,9 @@ import { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import toysData from '../data/toys.json';
-import { Button, Section, Badge, Card, CardContent } from '../components/ui';
+import { Button, Section, Badge, Card } from '../components/ui';
 import { Heart, Star, Truck, ShieldCheck, User, Mail, MapPin, Package, Clock, Box, CheckCircle2, ChevronLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ToyDetails = () => {
   const { id } = useParams();
@@ -74,22 +74,22 @@ const ToyDetails = () => {
   }
 
   return (
-    <div className="pt-24 pb-24 min-h-screen bg-muted/20">
+    <div className="pt-2 pb-20 min-h-screen bg-muted/20">
       <Section containerClassName="max-w-6xl">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary font-bold mb-12 transition-colors group"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary font-bold mb-8 transition-colors group"
         >
           <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" /> Back to Collection
         </button>
 
-        <div className="grid lg:grid-cols-12 gap-16">
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Media */}
-          <div className="lg:col-span-6 space-y-8">
+          <div className="lg:col-span-6 space-y-6">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
-              className="relative aspect-square rounded-[3rem] overflow-hidden premium-shadow group"
+              className="relative aspect-square rounded-xl overflow-hidden shadow-sm border border-border/50 group bg-background"
             >
               {toy.image ? (
                 <img src={toy.image} alt={toy.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -99,27 +99,27 @@ const ToyDetails = () => {
                 </div>
               )}
               {toy.availableQuantity < 5 && (
-                <div className="absolute top-6 left-6 px-4 py-2 bg-destructive text-destructive-foreground rounded-full text-sm font-black animate-pulse">
+                <div className="absolute top-4 left-4 px-3 py-1 bg-destructive text-destructive-foreground rounded-full text-[10px] font-black animate-pulse uppercase tracking-wider">
                   Only {toy.availableQuantity} left!
                 </div>
               )}
 
               <button
                 onClick={handleLike}
-                className={`absolute top-6 right-6 p-4 rounded-3xl glass transition-all ${liked ? 'text-destructive bg-destructive/10' : 'text-foreground/70 hover:text-destructive'}`}
+                className={`absolute top-4 right-4 p-3 rounded-xl glass transition-all ${liked ? 'text-destructive bg-destructive/10' : 'text-foreground/70 hover:text-destructive'}`}
               >
-                <Heart className={`w-6 h-6 ${liked ? 'fill-current' : ''}`} />
+                <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
               </button>
             </motion.div>
 
-            {/* Request Demo Section Redesigned */}
-            <Card className="bg-primary text-primary-foreground p-10 rounded-[3rem] premium-shadow overflow-hidden relative">
+            {/* Request Demo Section */}
+            <Card className="bg-primary text-primary-foreground p-8 rounded-xl premium-shadow overflow-hidden relative">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 blur-3xl rounded-full" />
               <div className="relative z-10">
-                <h3 className="text-3xl font-black mb-4 flex items-center gap-3">
-                  <Clock className="w-8 h-8" /> Request a Demo
+                <h3 className="text-2xl font-black mb-3 flex items-center gap-3">
+                  <Clock className="w-7 h-7" /> Request a Demo
                 </h3>
-                <p className="text-primary-foreground/80 mb-8 font-bold">Want to see it in action before buying? Our experts can show you via video call.</p>
+                <p className="text-primary-foreground/80 mb-6 text-sm font-medium">Want to see it in action before buying? Our experts can show you via video call.</p>
 
                 {submitted ? (
                   <motion.div
@@ -127,19 +127,19 @@ const ToyDetails = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex flex-col items-center py-6"
                   >
-                    <CheckCircle2 className="w-16 h-16 mb-4 text-accent" />
-                    <p className="text-xl font-black">Request Sent Successfully!</p>
-                    <p className="text-primary-foreground/70">We'll reach out to you within 2-4 hours.</p>
+                    <CheckCircle2 className="w-12 h-12 mb-3 text-accent" />
+                    <p className="text-lg font-black">Request Sent Successfully!</p>
+                    <p className="text-primary-foreground/70 text-sm">We'll reach out within 2-4 hours.</p>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="text"
                         placeholder="Your Name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-6 py-4 outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
+                        className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
                         required
                       />
                       <input
@@ -147,11 +147,11 @@ const ToyDetails = () => {
                         placeholder="Email Address"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-6 py-4 outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
+                        className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
                         required
                       />
                     </div>
-                    <Button variant="secondary" className="w-full py-5 text-lg font-black" type="submit">
+                    <Button variant="secondary" className="w-full py-4 text-xs font-black uppercase tracking-widest rounded-xl" type="submit">
                       Book Free Demo Session
                     </Button>
                   </form>
@@ -161,76 +161,83 @@ const ToyDetails = () => {
           </div>
 
           {/* Right Column: Info */}
-          <div className="lg:col-span-6 space-y-12">
+          <div className="lg:col-span-6 space-y-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <Badge variant="secondary" className="px-5 py-2 text-sm">{toy.category}</Badge>
-                <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500/10 text-amber-500 font-black text-sm border border-amber-500/20">
-                  <Star className="w-4 h-4 fill-current" /> {toy.rating} Consumer Rating
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold uppercase tracking-widest text-[10px] px-3">
+                  {toy.category}
+                </Badge>
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 font-black text-[10px] uppercase tracking-wider border border-amber-500/20">
+                  <Star className="w-3 h-3 fill-current" /> {toy.rating} Consumer Rating
                 </div>
               </div>
-              <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight tracking-tight">{toy.name}</h1>
-              <p className="text-muted-foreground text-xl leading-relaxed">{toy.description}</p>
+              <h1 className="text-3xl md:text-4xl font-black mb-4 leading-tight tracking-tight text-foreground">{toy.name}</h1>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-xl">{toy.description}</p>
             </motion.div>
 
             {/* Specs Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { label: 'Age Group', value: toy.age_group || '3+ Years', icon: User, color: 'text-blue-500 bg-blue-50' },
                 { label: 'Material', value: toy.material || 'Safe & Non-Toxic', icon: Box, color: 'text-green-500 bg-green-50' },
                 { label: 'Stock Status', value: `${toy.availableQuantity} available`, icon: Package, color: 'text-purple-500 bg-purple-50' },
                 { label: 'Express Dist.', value: '2-3 Business Days', icon: Truck, color: 'text-amber-500 bg-amber-50' },
               ].map((spec, i) => (
-                <div key={i} className="flex flex-col p-6 rounded-[2.5rem] bg-card border border-border/50 transition-colors hover:border-primary/20">
-                  <div className={`w-12 h-12 rounded-2xl ${spec.color} flex items-center justify-center mb-6`}>
-                    <spec.icon className="w-6 h-6" />
+                <div key={i} className="flex flex-col p-4 rounded-xl bg-card border border-border/50 transition-colors hover:border-primary/20">
+                  <div className={`w-10 h-10 rounded-lg ${spec.color} flex items-center justify-center mb-4`}>
+                    <spec.icon className="w-5 h-5" />
                   </div>
-                  <p className="text-muted-foreground text-xs font-black uppercase tracking-widest mb-1">{spec.label}</p>
-                  <p className="text-lg font-black">{spec.value}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{spec.label}</p>
+                  <p className="text-sm font-black">{spec.value}</p>
                 </div>
               ))}
             </div>
 
-            <div className="p-10 rounded-[3rem] bg-card border border-border/50 premium-shadow">
-              <div className="flex items-center justify-between mb-10">
+            {/* Price & Action Box */}
+            <div className="p-8 rounded-xl bg-card border border-border/50 shadow-sm space-y-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-muted-foreground font-black uppercase tracking-widest text-xs mb-1">Guaranteed Price</p>
-                  <p className="text-5xl font-black text-primary">${toy.price}</p>
+                  <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px] mb-1">Guaranteed Price</p>
+                  <p className="text-4xl font-black text-primary">${toy.price}</p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <Badge variant="accent" className="px-4 py-2 text-sm"><CheckCircle2 className="w-4 h-4 inline mr-2" /> Authorized Dealer</Badge>
+                  <Badge variant="accent" className="px-3 py-1 text-[10px] uppercase tracking-wider font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5 inline mr-1.5" /> Authorized Dealer
+                  </Badge>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="flex-1 py-6 text-xl h-auto">
+                <Button size="lg" className="flex-1 rounded-xl font-bold text-xs uppercase tracking-widest h-14">
                   Add to Shopping Bag
                 </Button>
-                <Button variant="outline" size="lg" onClick={handleLike} className={`flex-1 py-6 text-xl h-auto gap-2 ${liked ? 'bg-destructive/5 text-destructive border-destructive/20' : ''}`}>
-                  <Heart className={`w-6 h-6 ${liked ? 'fill-current' : ''}`} /> {liked ? 'In Favorites' : 'Add to Wishlist'}
+                <Button variant="outline" size="lg" onClick={handleLike} className={`flex-1 rounded-xl font-bold text-xs uppercase tracking-widest h-14 gap-2 ${liked ? 'bg-destructive/5 text-destructive border-destructive/20' : ''}`}>
+                  <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} /> {liked ? 'In Favorites' : 'Add to Wishlist'}
                 </Button>
               </div>
             </div>
 
-            {/* Seller Info Redesigned */}
-            <div className="glass p-10 rounded-[3rem] flex flex-col md:flex-row md:items-center gap-8 border-white/20">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-black shadow-lg">
+            {/* Seller Info */}
+            <div className="glass p-6 rounded-xl flex flex-col md:flex-row md:items-center gap-6 border-white/20">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-black shadow-lg">
                 {toy.seller_name?.[0] || 'S'}
               </div>
               <div className="flex-1">
-                <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Seller Information</h4>
-                <div className="space-y-2">
-                  <p className="text-2xl font-black">{toy.seller_name}</p>
-                  <div className="flex flex-wrap gap-x-6 gap-y-2">
-                    <p className="flex items-center gap-2 text-muted-foreground text-sm font-bold"><Mail className="w-4 h-4" /> {toy.seller_email}</p>
-                    <p className="flex items-center gap-2 text-muted-foreground text-sm font-bold"><MapPin className="w-4 h-4" /> {toy.seller_info}</p>
+                <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Seller Information</h4>
+                <div className="space-y-1">
+                  <p className="text-xl font-black">{toy.seller_name}</p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    <p className="flex items-center gap-2 text-muted-foreground text-xs font-bold"><Mail className="w-3.5 h-3.5" /> {toy.seller_email}</p>
+                    <p className="flex items-center gap-2 text-muted-foreground text-xs font-bold"><MapPin className="w-3.5 h-3.5" /> {toy.seller_info}</p>
                   </div>
                 </div>
               </div>
-              <Button variant="ghost" className="font-black text-primary hover:bg-white/20">View Store →</Button>
+              <Button variant="ghost" size="sm" className="font-bold text-primary hover:bg-primary/5 uppercase tracking-widest text-[10px]">
+                View Store →
+              </Button>
             </div>
           </div>
         </div>

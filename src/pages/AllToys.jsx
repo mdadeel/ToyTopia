@@ -62,28 +62,22 @@ const AllToys = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20">
-      <Section className="bg-primary/5 pb-32">
+    <div className="min-h-screen pt-2">
+      <Section className="bg-primary/5 pb-24">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-sm mb-6">
-              <Sparkles className="w-4 h-4" />
-              <span>Explore Our Full Universe</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">The Joy <span className="text-secondary italic">Collection</span></h1>
-            <p className="text-muted-foreground text-xl max-w-2xl mx-auto leading-relaxed">
-              From absolute classics to the latest educational wonders, browse our entire collection of {toys.length}+ curated toys.
-            </p>
+            <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">Our <span className="text-secondary italic">Toy Universe</span></h1>
+            <p className="text-muted-foreground text-lg">Discover curated magic for every age.</p>
           </motion.div>
         </div>
       </Section>
 
       <div className="container mx-auto px-4 -mt-24 relative z-10 pb-24">
         {/* Filter Bar */}
-        <div className="glass rounded-[3rem] p-6 mb-12 flex flex-col lg:flex-row gap-6 items-center premium-shadow">
+        <div className="glass rounded-xl p-6 mb-12 flex flex-col lg:flex-row gap-6 items-center premium-shadow">
           <div className="relative w-full lg:flex-1 group">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <input

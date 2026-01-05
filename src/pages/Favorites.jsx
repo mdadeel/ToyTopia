@@ -1,12 +1,11 @@
-// favourites page - users can save toys they like
-// using localStorage for now, maybe firebase later if we need sync across devices
-// TODO: add "clear all favourites" button
-
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import ToyCard from '../components/ToyCard';
+import ToyCard from '../components/Shared/ToyCard';
 import toysData from '../data/toys.json';
+import { Section, Badge, Button } from '../components/ui';
+import { Heart, Sparkles, ArrowRight, LogIn, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Favourites = () => {
   const { user, loading } = useContext(AuthContext);
@@ -14,71 +13,125 @@ const Favourites = () => {
   const location = useLocation();
 
   const [favouriteToys, setFavouriteToys] = useState([]);
-  const [dataLoading, setDataLoading] = useState(true); // extra loading state for favs data
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "ToyTopia || Favourites";
+    document.title = "ToyTopia || My Wishlist";
   }, [location]);
 
-  // if user not logged in, stop loading
   useEffect(() => {
     if (!loading && !user) {
       setDataLoading(false);
     }
   }, [loading, user]);
 
-  // load favourites from localStorage when user is available
   useEffect(() => {
     if (user) {
-      // localStorage theke favs gula niye aschi
       const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
       const toys = toysData.toys.filter(toy => favs.includes(toy.id));
       setFavouriteToys(toys);
       setDataLoading(false);
-      // console.log("found these favs:", favs);
-      console.log("favs loaded:", toys.length)
     }
   }, [user]);
 
   if (loading || dataLoading) {
-    return (<div className="min-h-screen flex justify-center items-center"><span className="loading loading-spinner loading-lg"></span></div>);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-16 h-16 bg-primary rounded-full blur-xl"
+        />
+      </div>
+    );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
-        <span className="text-6xl mb-4">❤️</span>
-        <h1 className="text-3xl font-bold mb-4">Your Favourites List</h1>
-        <p className="text-gray-500 mb-8">Please log in to see your saved toys</p>
-        <button onClick={() => navigate('/auth')} className="btn btn-primary">Login Now</button>
+      <div className="min-h-screen flex flex-col items-center justify-center pt-20 pb-20 bg-muted/20">
+        <Section containerClassName="max-w-2xl text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass p-16 rounded-[4rem] premium-shadow border-white/20"
+          >
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
+              <Heart className="w-12 h-12 text-primary" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">Your <span className="text-secondary italic">Vault</span> is Locked</h1>
+            <p className="text-muted-foreground text-lg mb-10 leading-relaxed font-medium">
+              Wishlists are saved to your personal portal. Log in or create an account to start curating your dream toy collection.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="gap-2 px-10" onClick={() => navigate('/auth')}>
+                <LogIn className="w-5 h-5" /> Sign In Now
+              </Button>
+              <Button size="lg" variant="ghost" className="font-black px-10" onClick={() => navigate('/register')}>
+                Join ToyTopia
+              </Button>
+            </div>
+          </motion.div>
+        </Section>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">My Wishlist</h1>
-        <p className="text-gray-500">{favouriteToys.length > 0 ? `You have saved ${favouriteToys.length} toys` : "Your wishlist is empty"}</p>
-      </div>
-
-      {favouriteToys.length === 0 ? (
-        <div className="card bg-base-100 shadow max-w-md mx-auto">
-          <div className="card-body text-center">
-            <span className="text-5xl mb-4">🧸</span>
-            <h3 className="card-title justify-center">No Favourites Yet</h3>
-            <p className="text-gray-500">Browse our collection and tap the heart to save items!</p>
-            <div className="card-actions justify-center mt-4"><Link to="/all-toys" className="btn btn-primary">Explore Toys →</Link></div>
+    <div className="min-h-screen pt-20 pb-20 bg-muted/20">
+      <Section className="pb-24">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-sm mb-6">
+              <Sparkles className="w-4 h-4" />
+              <span>Curated Selection</span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-4">My <span className="text-destructive italic">Wishlist</span></h1>
+            <p className="text-muted-foreground text-xl font-medium">Your personal collection of magical toys waiting to be yours.</p>
           </div>
+          {favouriteToys.length > 0 && (
+            <Badge variant="outline" className="px-6 py-3 text-lg font-black">{favouriteToys.length} Items Saved</Badge>
+          )}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {favouriteToys.map((toy) => (<ToyCard key={toy.id} toy={toy} />))}
-        </div>
-      )}
+
+        {favouriteToys.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-card border border-dashed border-border rounded-xl p-24 text-center"
+          >
+            <div className="w-28 h-28 bg-muted rounded-full flex items-center justify-center mx-auto mb-8">
+              <Heart className="w-12 h-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-4xl font-black mb-4 tracking-tight">Your wishlist is lonely</h3>
+            <p className="text-muted-foreground text-xl mb-12 max-w-md mx-auto leading-relaxed">
+              Explore our magical collection and tap the heart to save your favorite toys here!
+            </p>
+            <Link to="/all-toys">
+              <Button size="lg" className="px-12 py-6 text-xl rounded-[2rem] gap-3">
+                Start Exploring <ArrowRight className="w-6 h-6" />
+              </Button>
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+            {favouriteToys.map((toy, idx) => (
+              <motion.div
+                key={toy.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <ToyCard toy={toy} />
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </Section>
     </div>
   );
 };
+
+
 
 export default Favourites;

@@ -33,86 +33,83 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-3' : 'py-5'}`}>
-      <div className="max-w-7xl mx-auto px-4">
-        <div className={`glass rounded-[2rem] px-6 py-3 flex items-center justify-between transition-all duration-500 ${isScrolled ? 'mx-0' : 'mx-2 md:mx-4'}`}>
-          <Link to="/" className="flex items-center gap-3 group">
-            <motion.div whileHover={{ rotate: 15 }} className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-              <img src={logo} alt="ToyTopia" className="w-7 h-7 object-contain" />
-            </motion.div>
-            <span className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">ToyTopia</span>
-          </Link>
-
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) => `
-                  text-sm font-bold transition-all duration-300 hover:text-primary
-                  ${isActive ? 'text-primary scale-110' : 'text-foreground/70'}
-                `}
-              >
-                {link.name}
-              </NavLink>
-            ))}
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-border/50 ${isScrolled ? 'bg-background/80 backdrop-blur-md py-3' : 'bg-background py-4'}`}>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img src={logo} alt="ToyTopia" className="w-full h-full object-contain" />
           </div>
+          <span className="text-xl font-bold tracking-tight">ToyTopia</span>
+        </Link>
 
-          <div className="flex items-center gap-2 md:gap-4">
-            {user ? (
-              <div className="flex items-center gap-4">
-                <Link to="/favourites" className="p-2 hover:bg-primary/10 rounded-full transition-colors relative">
-                  <Heart className="w-5 h-5 text-foreground/70" />
-                </Link>
-                <div className="dropdown dropdown-end">
-                  <label tabIndex={0} className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 cursor-pointer block hover:border-primary transition-colors">
-                    <img src={user?.photoURL || 'https://i.ibb.co/ZYW3VTp/brown-brim.png'} referrerPolicy="no-referrer" />
-                  </label>
-                  <ul tabIndex={0} className="dropdown-content mt-4 p-4 glass rounded-3xl w-64 premium-shadow border border-white/20">
-                    <div className="px-2 py-3 border-b border-white/10 mb-2">
-                      <p className="font-black text-lg">{user?.displayName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                    </div>
-                    <li><Link to="/profile" className="flex items-center gap-3 p-3 hover:bg-primary/10 rounded-2xl transition-all font-bold"><User className="w-4 h-4" /> Profile</Link></li>
-                    <li><button onClick={handleLogout} className="w-full flex items-center gap-3 p-3 hover:bg-destructive/10 text-destructive rounded-2xl transition-all font-bold"><LogOut className="w-4 h-4" /> Logout</button></li>
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <Link to="/auth">
-                <Button size="sm">Get Started</Button>
-              </Link>
-            )}
-
-            <button
-              className="lg:hidden p-2 hover:bg-primary/10 rounded-xl transition-colors"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        {/* Desktop Nav */}
+        <div className="hidden lg:flex items-center gap-10">
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={({ isActive }) => `
+                text-xs font-bold uppercase tracking-widest transition-all duration-300 hover:text-primary
+                ${isActive ? 'text-primary' : 'text-foreground/60'}
+              `}
             >
-              {isMobileMenuOpen ? <X /> : <Menu />}
-            </button>
-          </div>
+              {link.name}
+            </NavLink>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-4">
+          {user ? (
+            <div className="flex items-center gap-4">
+              <Link to="/favourites" className="text-foreground/60 hover:text-primary transition-colors">
+                <Heart className="w-5 h-5" />
+              </Link>
+              <div className="dropdown dropdown-end">
+                <label tabIndex={0} className="w-8 h-8 rounded-full overflow-hidden border border-border cursor-pointer block hover:border-primary transition-colors">
+                  <img src={user?.photoURL || 'https://i.ibb.co/ZYW3VTp/brown-brim.png'} className="w-full h-full object-cover" />
+                </label>
+                <ul tabIndex={0} className="dropdown-content mt-4 p-2 bg-background border border-border rounded-xl w-56 shadow-xl">
+                  <div className="px-3 py-2 border-b border-border mb-1">
+                    <p className="font-bold text-sm truncate">{user?.displayName}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+                  <li><Link to="/profile" className="flex items-center gap-2 p-2 hover:bg-muted rounded-lg transition-all text-xs font-bold"><User className="w-3.5 h-3.5" /> Profile</Link></li>
+                  <li><button onClick={handleLogout} className="w-full flex items-center gap-2 p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-all text-xs font-bold"><LogOut className="w-3.5 h-3.5" /> Logout</button></li>
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <Link to="/auth">
+              <Button size="sm" className="rounded-lg px-6">Login</Button>
+            </Link>
+          )}
+
+          <button
+            className="lg:hidden p-2 text-foreground/70"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden absolute top-full left-0 right-0 px-4 mt-2"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden fixed top-[65px] left-0 right-0 bg-background border-b border-border shadow-2xl overflow-hidden"
           >
-            <div className="glass rounded-[2rem] p-6 flex flex-col gap-4">
+            <div className="p-6 flex flex-col gap-4">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.path}
                   to={link.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) => `
-                    text-lg font-bold p-3 rounded-2xl transition-all
-                    ${isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'}
+                    text-sm font-bold uppercase tracking-widest p-2 transition-all
+                    ${isActive ? 'text-primary' : 'text-foreground/60'}
                   `}
                 >
                   {link.name}
@@ -120,7 +117,7 @@ const Navbar = () => {
               ))}
               {!user && (
                 <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full">Get Started</Button>
+                  <Button className="w-full rounded-lg mt-4">Login</Button>
                 </Link>
               )}
             </div>

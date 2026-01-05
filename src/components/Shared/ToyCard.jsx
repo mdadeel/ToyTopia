@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import { Card, CardHeader, CardContent, CardFooter, Badge, Button } from '../ui';
-import { Heart, Star, Eye } from 'lucide-react';
+import { Heart, Star, Eye, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ToyCard = ({ toy }) => {
@@ -33,54 +33,57 @@ const ToyCard = ({ toy }) => {
     };
 
     return (
-        <Card className="group relative" hoverLift={true}>
-            <Link to={`/toy/${id}`}>
-                <div className="relative aspect-square overflow-hidden rounded-[2rem] mb-6">
-                    {image ? (
-                        <img
-                            src={image}
-                            alt={name}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-muted flex items-center justify-center">No Image</div>
-                    )}
+        <Card className="group flex flex-col h-full bg-background border border-border/50 hover:border-primary/30 transition-all duration-300 rounded-xl overflow-hidden shadow-sm">
+            <Link to={`/toy/${id}`} className="block relative aspect-[4/5] overflow-hidden">
+                {image ? (
+                    <img
+                        src={image}
+                        alt={name}
+                        className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+                    />
+                ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center text-xs font-bold uppercase tracking-widest text-muted-foreground">No Image</div>
+                )}
 
-                    <div className="absolute top-4 left-4 right-4 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Badge variant="secondary" className="glass py-2">{category}</Badge>
-                        <button
-                            onClick={handleLike}
-                            className={`p-3 rounded-2xl glass transition-all ${isLiked ? 'text-destructive bg-destructive/10' : 'text-foreground/70 hover:text-destructive'}`}
-                        >
-                            <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-                        </button>
-                    </div>
+                {/* Fixed Badge */}
+                <div className="absolute top-3 left-3">
+                    <Badge variant="secondary" className="bg-background/90 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border-none rounded-md px-2 py-1 shadow-sm">
+                        {category}
+                    </Badge>
+                </div>
 
-                    <div className="absolute inset-x-4 bottom-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <Button className="w-full glass border-white/20" size="sm">
-                            <Eye className="w-4 h-4 mr-2" /> Quick View
-                        </Button>
+                {/* Like Button */}
+                <button
+                    onClick={handleLike}
+                    className={`absolute top-3 right-3 p-2 rounded-lg bg-background/90 backdrop-blur-sm border border-border shadow-sm transition-all hover:scale-110 ${isLiked ? 'text-destructive' : 'text-foreground/40 hover:text-destructive'}`}
+                >
+                    <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+                </button>
+            </Link>
+
+            <div className="p-3 flex flex-col flex-grow">
+                <div className="flex justify-between items-start mb-2 gap-2">
+                    <h3 className="font-bold text-base leading-tight group-hover:text-primary transition-colors line-clamp-1">{name}</h3>
+                    <div className="flex items-center gap-1 shrink-0 text-amber-500">
+                        <Star className="w-3 h-3 fill-current" />
+                        <span className="text-[10px] font-black">{rating}</span>
                     </div>
                 </div>
 
-                <CardContent className="p-0">
-                    <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-black text-xl leading-tight group-hover:text-primary transition-colors line-clamp-1">{name}</h3>
-                    </div>
-                    <div className="flex items-center gap-1 mb-4 text-amber-500">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span className="text-sm font-bold">{rating}</span>
-                    </div>
-                    <p className="text-muted-foreground text-sm line-clamp-2 mb-6">{description}</p>
-                </CardContent>
+                <p className="text-muted-foreground text-xs line-clamp-2 mb-4 leading-relaxed font-medium">
+                    {description}
+                </p>
 
-                <CardFooter className="p-0 border-t-0 flex items-center justify-between">
-                    <span className="text-2xl font-black text-primary">${price}</span>
-                    <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent hover:text-primary">
-                        Details →
+                <div className="mt-auto pt-4 border-t border-border/50 flex items-center justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Price</span>
+                        <span className="text-base font-black text-foreground">${price}</span>
+                    </div>
+                    <Button size="sm" className="rounded-lg font-bold text-[11px] uppercase tracking-widest px-4 h-9 gap-2">
+                        <ShoppingBag size={14} /> Add
                     </Button>
-                </CardFooter>
-            </Link>
+                </div>
+            </div>
         </Card>
     );
 };
