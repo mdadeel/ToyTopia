@@ -2,7 +2,10 @@ import { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import toysData from '../data/toys.json';
-// import axios from 'axios'; // tried to use but too complicated
+import { Button, Section, Badge, Card, CardContent } from '../components/ui';
+import { Heart, Star, Truck, ShieldCheck, User, Mail, MapPin, Package, Clock, Box, CheckCircle2, ChevronLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
+
 const ToyDetails = () => {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
@@ -27,7 +30,6 @@ const ToyDetails = () => {
 
     const found = toysData.toys.find(t => t.id === id);
     if (!found) {
-      alert("Toy not found!");
       navigate('/');
       return;
     }
@@ -38,7 +40,6 @@ const ToyDetails = () => {
 
     const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
     setLiked(favs.includes(id));
-    console.log("toy loaded:", found.name)
   }, [id, user, navigate, location]);
 
   const handleLike = () => {
@@ -54,88 +55,186 @@ const ToyDetails = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !email) {
-      alert("Please fill all fields");
-      return;
-    }
+    if (!name || !email) return;
     setSubmitted(true);
     setName('');
     setEmail('');
   };
 
   if (loading || !toy) {
-    return (<div className="min-h-screen flex justify-center items-center"><span className="loading loading-spinner loading-lg"></span></div>);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-16 h-16 bg-primary rounded-full blur-xl"
+        />
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="pt-24 pb-24 min-h-screen bg-muted/20">
+      <Section containerClassName="max-w-6xl">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary font-bold mb-12 transition-colors group"
+        >
+          <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" /> Back to Collection
+        </button>
 
-        <div className="space-y-4">
-          <div className="relative">
-            {toy.image ? (<img src={toy.image} alt={toy.name} className="w-full rounded-2xl shadow-lg" />) : (<div className="w-full h-96 bg-gray-200 rounded-2xl flex items-center justify-center">No Image</div>)}
-            {toy.availableQuantity < 5 && (<span className="badge badge-error absolute top-4 left-4">Only {toy.availableQuantity} left!</span>)}
-          </div>
-
-          <div className="card bg-blue-50">
-            <div className="card-body">
-              <h3 className="card-title">📦 Request Demo</h3>
-              {submitted ? (
-                <div className="alert alert-success"><span>Request received! We'll contact you soon.</span></div>
+        <div className="grid lg:grid-cols-12 gap-16">
+          {/* Left Column: Media */}
+          <div className="lg:col-span-6 space-y-8">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="relative aspect-square rounded-[3rem] overflow-hidden premium-shadow group"
+            >
+              {toy.image ? (
+                <img src={toy.image} alt={toy.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-3">
-                  <input type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="input input-bordered w-full" required />
-                  <input type="email" placeholder="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input input-bordered w-full" required />
-                  <button type="submit" className="btn btn-primary w-full">Request Demo</button>
-                </form>
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <Package className="w-20 h-20 text-muted-foreground" />
+                </div>
               )}
+              {toy.availableQuantity < 5 && (
+                <div className="absolute top-6 left-6 px-4 py-2 bg-destructive text-destructive-foreground rounded-full text-sm font-black animate-pulse">
+                  Only {toy.availableQuantity} left!
+                </div>
+              )}
+
+              <button
+                onClick={handleLike}
+                className={`absolute top-6 right-6 p-4 rounded-3xl glass transition-all ${liked ? 'text-destructive bg-destructive/10' : 'text-foreground/70 hover:text-destructive'}`}
+              >
+                <Heart className={`w-6 h-6 ${liked ? 'fill-current' : ''}`} />
+              </button>
+            </motion.div>
+
+            {/* Request Demo Section Redesigned */}
+            <Card className="bg-primary text-primary-foreground p-10 rounded-[3rem] premium-shadow overflow-hidden relative">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 blur-3xl rounded-full" />
+              <div className="relative z-10">
+                <h3 className="text-3xl font-black mb-4 flex items-center gap-3">
+                  <Clock className="w-8 h-8" /> Request a Demo
+                </h3>
+                <p className="text-primary-foreground/80 mb-8 font-bold">Want to see it in action before buying? Our experts can show you via video call.</p>
+
+                {submitted ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center py-6"
+                  >
+                    <CheckCircle2 className="w-16 h-16 mb-4 text-accent" />
+                    <p className="text-xl font-black">Request Sent Successfully!</p>
+                    <p className="text-primary-foreground/70">We'll reach out to you within 2-4 hours.</p>
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <input
+                        type="text"
+                        placeholder="Your Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-6 py-4 outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
+                        required
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email Address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-6 py-4 outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
+                        required
+                      />
+                    </div>
+                    <Button variant="secondary" className="w-full py-5 text-lg font-black" type="submit">
+                      Book Free Demo Session
+                    </Button>
+                  </form>
+                )}
+              </div>
+            </Card>
+          </div>
+
+          {/* Right Column: Info */}
+          <div className="lg:col-span-6 space-y-12">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <Badge variant="secondary" className="px-5 py-2 text-sm">{toy.category}</Badge>
+                <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500/10 text-amber-500 font-black text-sm border border-amber-500/20">
+                  <Star className="w-4 h-4 fill-current" /> {toy.rating} Consumer Rating
+                </div>
+              </div>
+              <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight tracking-tight">{toy.name}</h1>
+              <p className="text-muted-foreground text-xl leading-relaxed">{toy.description}</p>
+            </motion.div>
+
+            {/* Specs Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: 'Age Group', value: toy.age_group || '3+ Years', icon: User, color: 'text-blue-500 bg-blue-50' },
+                { label: 'Material', value: toy.material || 'Safe & Non-Toxic', icon: Box, color: 'text-green-500 bg-green-50' },
+                { label: 'Stock Status', value: `${toy.availableQuantity} available`, icon: Package, color: 'text-purple-500 bg-purple-50' },
+                { label: 'Express Dist.', value: '2-3 Business Days', icon: Truck, color: 'text-amber-500 bg-amber-50' },
+              ].map((spec, i) => (
+                <div key={i} className="flex flex-col p-6 rounded-[2.5rem] bg-card border border-border/50 transition-colors hover:border-primary/20">
+                  <div className={`w-12 h-12 rounded-2xl ${spec.color} flex items-center justify-center mb-6`}>
+                    <spec.icon className="w-6 h-6" />
+                  </div>
+                  <p className="text-muted-foreground text-xs font-black uppercase tracking-widest mb-1">{spec.label}</p>
+                  <p className="text-lg font-black">{spec.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-10 rounded-[3rem] bg-card border border-border/50 premium-shadow">
+              <div className="flex items-center justify-between mb-10">
+                <div>
+                  <p className="text-muted-foreground font-black uppercase tracking-widest text-xs mb-1">Guaranteed Price</p>
+                  <p className="text-5xl font-black text-primary">${toy.price}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <Badge variant="accent" className="px-4 py-2 text-sm"><CheckCircle2 className="w-4 h-4 inline mr-2" /> Authorized Dealer</Badge>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" className="flex-1 py-6 text-xl h-auto">
+                  Add to Shopping Bag
+                </Button>
+                <Button variant="outline" size="lg" onClick={handleLike} className={`flex-1 py-6 text-xl h-auto gap-2 ${liked ? 'bg-destructive/5 text-destructive border-destructive/20' : ''}`}>
+                  <Heart className={`w-6 h-6 ${liked ? 'fill-current' : ''}`} /> {liked ? 'In Favorites' : 'Add to Wishlist'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Seller Info Redesigned */}
+            <div className="glass p-10 rounded-[3rem] flex flex-col md:flex-row md:items-center gap-8 border-white/20">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-black shadow-lg">
+                {toy.seller_name?.[0] || 'S'}
+              </div>
+              <div className="flex-1">
+                <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Seller Information</h4>
+                <div className="space-y-2">
+                  <p className="text-2xl font-black">{toy.seller_name}</p>
+                  <div className="flex flex-wrap gap-x-6 gap-y-2">
+                    <p className="flex items-center gap-2 text-muted-foreground text-sm font-bold"><Mail className="w-4 h-4" /> {toy.seller_email}</p>
+                    <p className="flex items-center gap-2 text-muted-foreground text-sm font-bold"><MapPin className="w-4 h-4" /> {toy.seller_info}</p>
+                  </div>
+                </div>
+              </div>
+              <Button variant="ghost" className="font-black text-primary hover:bg-white/20">View Store →</Button>
             </div>
           </div>
         </div>
-
-        <div className="space-y-6">
-          <div>
-            <span className="badge badge-secondary mb-2">{toy.category}</span>
-            <h1 className="text-3xl font-bold mb-2">{toy.name}</h1>
-            <div className="flex items-center gap-2 text-amber-500"><span>⭐ {toy.rating}</span></div>
-          </div>
-
-          <p className="text-gray-600 text-lg">{toy.description}</p>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg"><p className="text-gray-500 text-sm">Age Group</p><p className="font-bold">{toy.age_group || '3+ Years'}</p></div>
-            <div className="bg-gray-50 p-4 rounded-lg"><p className="text-gray-500 text-sm">Material</p><p className="font-bold">{toy.material || 'Safe Plastic'}</p></div>
-            <div className="bg-gray-50 p-4 rounded-lg"><p className="text-gray-500 text-sm">Seller</p><p className="font-bold">{toy.seller_name}</p></div>
-            <div className="bg-gray-50 p-4 rounded-lg"><p className="text-gray-500 text-sm">Stock</p><p className="font-bold text-green-600">{toy.availableQuantity} available</p></div>
-          </div>
-
-          <div className="flex items-center justify-between border-t pt-6">
-            <div><p className="text-gray-500 text-sm">Price</p><p className="text-4xl font-bold text-blue-600">${toy.price}</p></div>
-            <div className="flex gap-2">
-              {/* 
-                <button className="btn btn-outline">Favorite</button> 
-                */}
-              <button onClick={handleLike} className={`btn ${liked ? 'btn-error' : 'btn-outline'}`}>{liked ? '❤️ Saved' : '🤍 Save'}</button>
-            </div>
-          </div>
-
-          {/* Version 1: just simple text */}
-          {/*
-            <div className="seller-info">
-              <p>{toy.seller_name}</p>
-            </div>
-            */}
-
-          <div className="card bg-gray-50">
-            <div className="card-body">
-              <h3 className="card-title">Seller Information</h3>
-              <p><strong>Name:</strong> {toy.seller_name}</p>
-              <p><strong>Email:</strong> {toy.seller_email}</p>
-              <p><strong>Location:</strong> {toy.seller_info}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </Section>
     </div>
   );
 };

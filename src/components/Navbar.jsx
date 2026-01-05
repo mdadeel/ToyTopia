@@ -1,60 +1,133 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import { Button } from './ui';
+import { ShoppingBag, Heart, User, LogOut, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import logo from '/logo.png';
+
 const Navbar = () => {
   const { user, signOut } = useContext(AuthContext);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  console.log(user)
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
-    signOut()
-      .then()
-      .catch(error => console.log(error))
-    navigate("/")
-  }
+    signOut().catch(error => console.log(error));
+    navigate("/");
+  };
 
-  const menuItems = <>
-    <li><NavLink to="/" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>Home</NavLink></li>
-    <li><NavLink to="/all-toys" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>All Toys</NavLink></li>
-    {user && <li><NavLink to="/favourites" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>Favourites</NavLink></li>}
-    {user && <li><NavLink to="/profile" className={({ isActive }) => (isActive ? 'text-blue-600 underline' : 'default')}>My Profile</NavLink></li>}
-  </>
-
-  const userInfo = <div className="ml-auto dropdown dropdown-end">
-    <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-      <div className="w-10 rounded-full"><img src={user?.photoURL || 'https://i.ibb.co/ZYW3VTp/brown-brim.png'} /></div>
-    </label>
-    <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
-      <li className="text-center font-bold py-2">{user?.displayName}</li>
-      <li><Link to="/profile" className="justify-between">My Profile</Link></li>
-      <li><Link to="/favourites">Favourites</Link></li>
-      <li onClick={handleLogout}><a>Logout</a></li>
-    </ul>
-  </div>
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'All Toys', path: '/all-toys' },
+    ...(user ? [
+      { name: 'Favourites', path: '/favourites' },
+      { name: 'My Profile', path: '/profile' }
+    ] : [])
+  ];
 
   return (
-    <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50">
-      <div className="navbar-start">
-        <div className="dropdown">
-          <label tabIndex={0} className="btn btn-ghost lg:hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
-          </label>
-          <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">{menuItems}</ul>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-3' : 'py-5'}`}>
+      <div className="max-w-7xl mx-auto px-4">
+        <div className={`glass rounded-[2rem] px-6 py-3 flex items-center justify-between transition-all duration-500 ${isScrolled ? 'mx-0' : 'mx-2 md:mx-4'}`}>
+          <Link to="/" className="flex items-center gap-3 group">
+            <motion.div whileHover={{ rotate: 15 }} className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+              <img src={logo} alt="ToyTopia" className="w-7 h-7 object-contain" />
+            </motion.div>
+            <span className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">ToyTopia</span>
+          </Link>
+
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) => `
+                  text-sm font-bold transition-all duration-300 hover:text-primary
+                  ${isActive ? 'text-primary scale-110' : 'text-foreground/70'}
+                `}
+              >
+                {link.name}
+              </NavLink>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 md:gap-4">
+            {user ? (
+              <div className="flex items-center gap-4">
+                <Link to="/favourites" className="p-2 hover:bg-primary/10 rounded-full transition-colors relative">
+                  <Heart className="w-5 h-5 text-foreground/70" />
+                </Link>
+                <div className="dropdown dropdown-end">
+                  <label tabIndex={0} className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 cursor-pointer block hover:border-primary transition-colors">
+                    <img src={user?.photoURL || 'https://i.ibb.co/ZYW3VTp/brown-brim.png'} referrerPolicy="no-referrer" />
+                  </label>
+                  <ul tabIndex={0} className="dropdown-content mt-4 p-4 glass rounded-3xl w-64 premium-shadow border border-white/20">
+                    <div className="px-2 py-3 border-b border-white/10 mb-2">
+                      <p className="font-black text-lg">{user?.displayName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                    <li><Link to="/profile" className="flex items-center gap-3 p-3 hover:bg-primary/10 rounded-2xl transition-all font-bold"><User className="w-4 h-4" /> Profile</Link></li>
+                    <li><button onClick={handleLogout} className="w-full flex items-center gap-3 p-3 hover:bg-destructive/10 text-destructive rounded-2xl transition-all font-bold"><LogOut className="w-4 h-4" /> Logout</button></li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            )}
+
+            <button
+              className="lg:hidden p-2 hover:bg-primary/10 rounded-xl transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X /> : <Menu />}
+            </button>
+          </div>
         </div>
-        <Link to="/" className="flex items-center gap-2">
-          {/* logo size is too big on mobile, fixing later */}
-          <img src={logo} alt="ToyTopia" style={{ width: '40px', height: '40px' }} />
-          <span className="btn btn-ghost normal-case text-xl font-bold text-blue-600">ToyTopia</span>
-        </Link>
       </div>
-      <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1 font-medium">{menuItems}</ul>
-      </div>
-      <div className="navbar-end">
-        {user ? userInfo : <Link className="btn btn-primary" to="/auth">Login</Link>}
-      </div>
-    </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="lg:hidden absolute top-full left-0 right-0 px-4 mt-2"
+          >
+            <div className="glass rounded-[2rem] p-6 flex flex-col gap-4">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={({ isActive }) => `
+                    text-lg font-bold p-3 rounded-2xl transition-all
+                    ${isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-primary/10'}
+                  `}
+                >
+                  {link.name}
+                </NavLink>
+              ))}
+              {!user && (
+                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full">Get Started</Button>
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
   );
 };
 

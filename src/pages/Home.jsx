@@ -1,12 +1,14 @@
 import { useEffect, useState, useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-// import ToyCard from '@/components/Shared/ToyCard';
+import { useLocation } from 'react-router-dom';
+import ToyCard from '../components/Shared/ToyCard';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import toysData from '../data/toys.json';
-import { AuthContext } from '../contexts/AuthContext';
+import { Button, Section, Badge } from '../components/ui';
+import { ShoppingBag, Truck, ShieldCheck, MapPin, Search, SlidersHorizontal, ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -15,26 +17,11 @@ const Home = () => {
   const location = useLocation();
 
   const [search, setSearch] = useState('');
-  const [catagory, setCatagory] = useState('All Catagories'); // keeping spell mistake for now
+  const [category, setCategory] = useState('All Categories');
   const [showCount, setShowCount] = useState(8);
 
-  let filteredToys = toys;
-  if (search) {
-    let q = search.toLowerCase();
-    filteredToys = filteredToys.filter(toy => {
-      // search by name or description
-      let nameMatch = toy.name.toLowerCase().includes(q);
-      let descMatch = toy.description && toy.description.toLowerCase().includes(q);
-      return nameMatch || descMatch;
-    });
-  }
-  if (catagory !== 'All Catagories') {
-    filteredToys = filteredToys.filter(toy => toy.category === catagory);
-  }
-  // console.log("filtered:", filteredToys.length);
-
-  const catagories = [
-    'All Catagories',
+  const categories = [
+    'All Categories',
     'Building Blocks',
     'Stuffed Animals',
     'Puzzles',
@@ -45,207 +32,234 @@ const Home = () => {
     'Board Games'
   ];
 
-  /*
-  useEffect(() => {
-    fetch('https://toypia-server.vercel.app/toys')
-      .then(res => res.json())
-      .then(data => setToys(data))
-  }, [])
-  */
+  let filteredToys = toys;
+  if (search) {
+    let q = search.toLowerCase();
+    filteredToys = filteredToys.filter(toy => {
+      let nameMatch = toy.name.toLowerCase().includes(q);
+      let descMatch = toy.description && toy.description.toLowerCase().includes(q);
+      return nameMatch || descMatch;
+    });
+  }
+  if (category !== 'All Categories') {
+    filteredToys = filteredToys.filter(toy => toy.category === category);
+  }
 
   useEffect(() => {
-    // scroll to top
     window.scrollTo(0, 0);
-    document.title = "ToyTopia || Home";
-    AOS.init({ duration: 1000 });
+    document.title = "ToyTopia || Premium Toy Store";
+    AOS.init({ duration: 1000, once: true });
   }, [location]);
 
-  // FIXME: sometimes this runs twice
   useEffect(() => {
     setShowCount(8);
-  }, [search, catagory]);
+  }, [search, category]);
 
   const scrollToToys = () => {
-    const el = document.getElementById('toys-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    document.getElementById('toys-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // TODO: add loader here
-  // const debugSearch = () => {
-  //   console.log(search)
-  // }
-
-  const loadMore = () => {
-    setShowCount(prev => prev + 8);
-  };
+  const loadMore = () => setShowCount(prev => prev + 8);
 
   return (
-    <div>
+    <div className="overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] flex items-center pt-24 pb-12 overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 blur-[120px] rounded-full" />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-secondary/20 blur-[120px] rounded-full" />
 
-      <section className="bg-gray-50 rounded-3xl my-4 mx-4" data-aos="fade-up">
-        <div className="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
-          <div className="mr-auto place-self-center lg:col-span-7">
-            <div className="badge badge-primary mb-4">🇧🇩 No.1 Toy Shop in Bangladesh</div>
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-4">Welcome to <br /><span className="text-blue-600">ToyTopia</span></h1>
-            <p className="max-w-2xl mb-6 text-gray-600 text-lg">Best toys for your kids. We delever all over Bangladesh. Cash on Delivery available! 🚚</p>
-            <button onClick={scrollToToys} className="btn btn-primary mr-3" style={{ borderRadius: '50px' }}>Shop Now</button>
-            <button className="btn btn-outline">Call for Bulk</button>
+        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-16 items-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-sm mb-8">
+              <Sparkles className="w-4 h-4" />
+              <span>No.1 Toy Shop in Bangladesh</span>
+            </div>
+            <h1 className="text-6xl md:text-8xl font-black mb-8 leading-[1.1] tracking-tight">
+              Where Every <span className="text-primary italic">Toy</span> <br />
+              Tells a <span className="underline decoration-secondary/30">Story</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-10 max-w-xl leading-relaxed">
+              Discover a curated universe of premium toys designed to inspire imagination, creativity, and endless joy for your little ones.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button size="lg" onClick={scrollToToys} className="gap-2">
+                Explore Collection <ArrowRight className="w-5 h-5" />
+              </Button>
+              <Button size="lg" variant="outline">
+                Visit our Store
+              </Button>
+            </div>
 
-            <div className="flex gap-8 mt-8">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{toys.length}+</div>
-                <div className="text-sm text-gray-500">Products</div>
+            <div className="flex gap-12 mt-16 pt-12 border-t border-border">
+              <div>
+                <div className="text-4xl font-black text-primary">{toys.length}+</div>
+                <div className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">Products</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">100%</div>
-                <div className="text-sm text-gray-500">Original</div>
+              <div>
+                <div className="text-4xl font-black text-secondary">4.9/5</div>
+                <div className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">Average Rating</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">Fast</div>
-                <div className="text-sm text-gray-500">Delievery</div>
+              <div>
+                <div className="text-4xl font-black text-accent">100%</div>
+                <div className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">Original</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="hidden lg:flex lg:col-span-5 lg:mt-0" data-aos="fade-left">
-            <div className="grid grid-cols-2 gap-4">
-              {toys.slice(0, 4).map((toy) => (
-                <Link key={toy.id} to={`/toy/${toy.id}`} className="card bg-white shadow hover:shadow-lg transition">
-                  <figure className="px-4 pt-4"><img src={toy.image} alt={toy.name} className="rounded-xl h-24 w-full object-cover" /></figure>
-                  <div className="card-body p-3">
-                    <h3 className="text-sm font-bold truncate">{toy.name}</h3>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-blue-600 font-bold">${toy.price}</span>
-                      <span className="text-gray-400">⭐ {toy.rating}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="relative lg:h-[600px] hidden lg:block"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent rounded-[4rem] -rotate-3 border border-primary/10" />
+            <img
+              src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=1000"
+              alt="Hero Toy"
+              className="w-full h-full object-cover rounded-[4rem] shadow-2xl relative z-10"
+            />
+            {/* Floating Card */}
+            <motion.div
+              animate={{ y: [0, -20, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -bottom-8 -left-8 glass p-6 rounded-[2.5rem] z-20 premium-shadow max-w-[240px]"
+            >
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center text-white">
+                  <Truck className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="font-black">Flash Delivery</p>
+                  <p className="text-xs text-muted-foreground">Inside Dhaka 24h</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      <section className="py-8 px-4">
-        <h2 className="text-3xl font-bold text-center mb-6" data-aos="fade-up">🔥 Trending Toys</h2>
-        <Swiper modules={[Navigation, Autoplay]} spaceBetween={16} slidesPerView={1} navigation autoplay={{ delay: 3000 }} breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 }, 1280: { slidesPerView: 4 } }}>
+      {/* Trending Section */}
+      <Section
+        title="🔥 Trending This Week"
+        subtitle="Our most loved and requested items that are flying off the shelves."
+        className="bg-muted/30"
+      >
+        <Swiper
+          modules={[Navigation, Autoplay]}
+          spaceBetween={32}
+          slidesPerView={1}
+          navigation
+          autoplay={{ delay: 3000 }}
+          breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 }, 1280: { slidesPerView: 4 } }}
+          className="pb-12"
+        >
           {toys.slice(0, 8).map((toy) => (
-            <SwiperSlide key={`slide-${toy.id}`}><ToyCard toy={toy} /></SwiperSlide>
+            <SwiperSlide key={`trending-${toy.id}`} className="p-2">
+              <ToyCard toy={toy} />
+            </SwiperSlide>
           ))}
         </Swiper>
-      </section>
+      </Section>
 
-      <section className="py-8 px-4 bg-gray-100" data-aos="fade-up">
-        <div className="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="card bg-blue-50">
-            <div className="card-body flex-row items-center gap-4">
-              <span className="text-3xl">🚚</span>
-              <div><h3 className="font-bold">Fast Delievery</h3><p className="text-sm text-gray-500">Inside Dhaka 24hrs</p></div>
-            </div>
-          </div>
-          <div className="card bg-green-50">
-            <div className="card-body flex-row items-center gap-4">
-              <span className="text-3xl">✅</span>
-              <div><h3 className="font-bold">100% Original</h3><p className="text-sm text-gray-500">Guaranteed authentic</p></div>
-            </div>
-          </div>
-          <div className="card bg-purple-50">
-            <div className="card-body flex-row items-center gap-4">
-              <span className="text-3xl">🏪</span>
-              <div><h3 className="font-bold">Visit Store</h3><p className="text-sm text-gray-500">Agrabad, Chittagong</p></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <main id="toys-section" className="py-8 px-4">
-        <div className="text-center mb-8" data-aos="fade-up">
-          <h2 className="text-3xl font-bold mb-2">All Products</h2>
-          <p className="text-gray-500">Browse our collection of quality toys</p>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4 mb-8 justify-center">
-          <input type="text" placeholder="Search toys..." value={search} onChange={(e) => setSearch(e.target.value)} className="input input-bordered w-full md:w-1/2" />
-          <select value={catagory} onChange={(e) => setCatagory(e.target.value)} className="select select-bordered w-full md:w-48">
-            {catagories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
-          </select>
-        </div>
-
-        {filteredToys.length === 0 ? (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-bold mb-2">No toys found</h3>
-            <p className="text-gray-500 mb-4">Try different search or filter</p>
-            <button onClick={() => { setSearch(''); setCatagory('All Catagories'); }} className="btn btn-outline">Clear Filters</button>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredToys.slice(0, showCount).map((toy) => (<ToyCard key={toy.id} toy={toy} />))}
-            </div>
-
-            {filteredToys.length > showCount && (
-              <div className="text-center mt-10">
-                <button onClick={loadMore} className="btn btn-secondary">Load More ({filteredToys.length - showCount} remaining)</button>
+      {/* Features Grid */}
+      <Section>
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            { icon: Truck, title: "Fast Delivery", desc: "Express delivery across Bangladesh. Inside Dhaka within 24 hours.", color: "bg-blue-500", light: "bg-blue-50 text-blue-500" },
+            { icon: ShieldCheck, title: "100% Original", desc: "Authentic global brands. We guarantee quality and safety for your kids.", color: "bg-green-500", light: "bg-green-50 text-green-500" },
+            { icon: MapPin, title: "Physical Store", desc: "Visit our toy paradise at Agrabad, Chittagong and experience the joy.", color: "bg-purple-500", light: "bg-purple-50 text-purple-500" },
+          ].map((feature, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ y: -10 }}
+              className="p-10 rounded-[3rem] bg-card border border-border/50 hover:border-primary/20 transition-all premium-shadow"
+            >
+              <div className={`w-16 h-16 rounded-3xl ${feature.light} flex items-center justify-center mb-8`}>
+                <feature.icon className="w-8 h-8" />
               </div>
-            )}
-          </>
-        )}
+              <h3 className="text-2xl font-black mb-4">{feature.title}</h3>
+              <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Main Catalog */}
+      <main id="toys-section" className="py-24 px-4 bg-muted/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+            <div data-aos="fade-right">
+              <h2 className="text-4xl md:text-5xl font-black mb-4">Discover Your Next <span className="text-primary">Playmate</span></h2>
+              <p className="text-muted-foreground text-lg">Browse our complete collection by category or keywords.</p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto" data-aos="fade-left">
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Search toys..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-12 pr-6 py-4 rounded-2xl bg-card border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none w-full sm:w-80 font-medium transition-all"
+                />
+              </div>
+              <div className="relative">
+                <SlidersHorizontal className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="pl-12 pr-10 py-4 rounded-2xl bg-card border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none font-bold cursor-pointer transition-all"
+                >
+                  {categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {filteredToys.length === 0 ? (
+            <div className="text-center py-24 bg-card rounded-[3rem] border border-dashed border-border">
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <h3 className="text-3xl font-black mb-4">Oh no! No toys found</h3>
+              <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">We couldn't find anything matching your search. Try adjusting your filters or keywords.</p>
+              <Button onClick={() => { setSearch(''); setCategory('All Categories'); }}>
+                Clear All Filters
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {filteredToys.slice(0, showCount).map((toy) => (
+                  <motion.div
+                    key={toy.id}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <ToyCard toy={toy} />
+                  </motion.div>
+                ))}
+              </div>
+
+              {filteredToys.length > showCount && (
+                <div className="text-center mt-20">
+                  <Button variant="outline" size="lg" onClick={loadMore} className="group">
+                    Load More ✨ ({filteredToys.length - showCount} magic left)
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
-    </div>
-  );
-};
-
-// Defined locally because I was too lazy to make a file
-const ToyCard = ({ toy }) => {
-  const { id, name, description, price, image, category, rating } = toy;
-  const { user } = useContext(AuthContext);
-
-  const [liked, setLiked] = useState(false);
-
-  useEffect(() => {
-    const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-    setLiked(favs.includes(id));
-  }, [id]);
-
-  const handleLike = () => {
-    if (!user) {
-      alert("Please login first");
-      return;
-    }
-    let favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-    if (favs.includes(id)) {
-      favs = favs.filter(f => f !== id);
-      console.log("removed from favs")
-    } else {
-      favs.push(id);
-      console.log("added to favs")
-    }
-    localStorage.setItem('favourites', JSON.stringify(favs));
-    setLiked(!liked);
-  };
-
-  return (
-    <div className="card bg-base-100 shadow hover:shadow-lg transition">
-      <figure className="px-4 pt-4 relative">
-        {image ? (<img src={image} alt={name} className="rounded-xl h-48 w-full object-cover" />) : (<div className="rounded-xl h-48 w-full bg-gray-200 flex items-center justify-center">No Image</div>)}
-        <button onClick={handleLike} className={`btn btn-circle btn-sm absolute top-6 right-6 ${liked ? 'btn-error' : 'btn-ghost bg-white'}`}>{liked ? '❤️' : '🤍'}</button>
-      </figure>
-
-      <div className="card-body p-4">
-        <div className="flex justify-between items-center mb-2">
-          {category && <span className="badge badge-secondary">{category}</span>}
-          {rating > 0 && <span className="text-amber-500 text-sm">⭐ {rating}</span>}
-        </div>
-        <h3 className="card-title text-base">{name}</h3>
-        <p className="text-sm text-gray-500 line-clamp-2">{description}</p>
-
-        <div className="card-actions justify-between items-center mt-auto pt-3 border-t">
-          <span className="text-lg font-bold text-blue-600">${price}</span>
-          <Link to={`/toy/${id}`}><button className="btn btn-primary btn-sm">View Details</button></Link>
-        </div>
-      </div>
     </div>
   );
 };
