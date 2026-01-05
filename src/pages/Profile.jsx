@@ -70,7 +70,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="pt-20 pb-20 min-h-screen bg-muted/20">
+    <div className="pt-8 pb-20 min-h-screen bg-muted/20">
       <Section containerClassName="max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
@@ -176,66 +176,51 @@ const Profile = () => {
             </Card>
           </div>
 
-          {/* Right: Community / Activity */}
-          <div className="lg:col-span-8 space-y-10">
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-3xl font-black tracking-tight flex items-center gap-4">
-                  <Heart className="w-8 h-8 text-destructive fill-current" /> My Handpicked Magic
-                </h3>
-                <Link to="/all-toys">
-                  <Button variant="ghost" className="font-black text-primary">Discover More →</Button>
-                </Link>
-              </div>
-
-              {favouriteToys.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  {favouriteToys.map((toy, idx) => (
-                    <motion.div
-                      key={toy.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                    >
-                      <ToyCard toy={toy} />
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-card border border-dashed border-border rounded-[3rem] p-16 text-center">
-                  <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Heart className="w-10 h-10 text-muted-foreground" />
-                  </div>
-                  <h4 className="text-2xl font-black mb-2">Your wishlist is empty</h4>
-                  <p className="text-muted-foreground font-medium mb-8">Start exploring our collection and tap the heart on toys you love!</p>
-                  <Link to="/all-toys">
-                    <Button>Go Exploring</Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Mock Activity Section */}
-            <div>
-              <h3 className="text-2xl font-black tracking-tight mb-8">Recent Activity</h3>
-              <div className="space-y-4">
-                {[
-                  { text: 'You saved "Mega Builder Set" to your wishlist', time: '2 hours ago', icon: Heart, color: 'text-destructive bg-destructive/10' },
-                  { text: 'Profile picture updated successfully', time: 'Yesterday', icon: User, color: 'text-primary bg-primary/10' },
-                  { text: 'Welcome to ToyTopia!', time: '3 days ago', icon: Sparkles, color: 'text-accent bg-accent/10' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-5 p-6 rounded-3xl bg-card border border-border/50 hover:border-primary/20 transition-all cursor-default group">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${item.color} shrink-0 transition-transform group-hover:scale-110`}>
-                      <item.icon className="w-6 h-6" />
+          {/* Right: Quick Links & Stats */}
+          <div className="lg:col-span-8 space-y-6">
+            <h3 className="text-2xl font-black tracking-tight">Quick Actions</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link to="/favorites">
+                <Card className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all cursor-pointer group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center text-destructive shrink-0 transition-transform group-hover:scale-110">
+                      <Heart className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-black text-sm">{item.text}</p>
-                      <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">{item.time}</p>
+                      <p className="font-black text-base">My Wishlist</p>
+                      <p className="text-xs text-muted-foreground font-bold">{favouriteToys.length} items saved</p>
                     </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
                   </div>
-                ))}
-              </div>
+                </Card>
+              </Link>
+              <Link to="/all-toys">
+                <Card className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all cursor-pointer group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-110">
+                      <Package className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-black text-base">Browse Toys</p>
+                      <p className="text-xs text-muted-foreground font-bold">Explore our collection</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                  </div>
+                </Card>
+              </Link>
             </div>
+
+            <Card className="p-6 rounded-xl bg-muted/50 border border-border/50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-black text-base">Account Status: Active</p>
+                  <p className="text-xs text-muted-foreground font-bold">Your ToyTopia account is in good standing.</p>
+                </div>
+              </div>
+            </Card>
           </div>
 
         </div>

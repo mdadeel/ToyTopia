@@ -49,7 +49,7 @@ const Favourites = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center pt-20 pb-20 bg-muted/20">
+      <div className="min-h-screen flex flex-col items-center justify-center pt-8 pb-8 bg-muted/20">
         <Section containerClassName="max-w-2xl text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -78,7 +78,7 @@ const Favourites = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-20 bg-muted/20">
+    <div className="min-h-screen pt-8 pb-20 bg-muted/20">
       <Section className="pb-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div className="max-w-2xl">
