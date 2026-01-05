@@ -3,7 +3,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import toysData from '../data/toys.json';
 import { Section, Button, Card, CardContent, Badge } from '../components/ui';
-import { User, Mail, Camera, Save, X, LogOut, Heart, Calendar, Package, ChevronRight, Settings } from 'lucide-react';
+import { User, Mail, Camera, Save, X, LogOut, Heart, Calendar, Package, ChevronRight, Settings, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ToyCard from '../components/Shared/ToyCard';
 
