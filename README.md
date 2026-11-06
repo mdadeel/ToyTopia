@@ -1,44 +1,79 @@
-# 🧸 ToyTopia
+# ToyTopia
 
-Hi! Welcome to **ToyTopia**! This is a simple website for buying used toys in Bangladesh. I made this project to learn React and Firebase.
+A warm, playful marketplace for discovering toys. ToyTopia is a React storefront built around a friendly, kid-attracting toy-shop experience — bright category tiles, star ratings, a curated home feed, and a clean, modern checkout-ready product page.
 
-## 👋 About Me
-I am a junior developer learning web development. This is one of my first big projects! I used React because it's popular and fun. I tried my best to make the code clean, but sorry if it looks a bit messy sometimes! 😅
+## Features
 
-## 🚀 How to Run It
-If you want to run this project on your computer, just follow these steps:
+- **Browse & discover** — home feed with trending toys, category tiles, and a "shop by age" section.
+- **Catalog** — filter by category, free-text search, and sort by popularity, price, or rating.
+- **Product pages** — image, price, rating with review counts, quick specs, related toys, and an add-to-bag action backed by a lightweight cart.
+- **Accounts** — email/password and Google sign-in via Firebase, plus a profile and a saved-items (wishlist) view.
+- **Brand system** — warm cream/coral palette, Baloo 2 display type, Nunito body, and fully local assets (no external image or font dependencies).
 
-1.  **Download user files**: Clone this repo or download the zip.
-2.  **Install stuff**: Open terminal and type:
-    ```bash
-    npm install
-    ```
-    (This installs all the packages I used)
-3.  **Setup Firebase**:
-    - You need a file called `.env` in the main folder.
-    - Ask me for the keys or copy `.env.example` and put your own keys there!
-4.  **Start the server**:
-    ```bash
-    npm run dev
-    ```
-5.  Open `http://localhost:5173` (or whatever link it shows) in your browser.
+## Tech stack
 
-## 🛠️ Tech I Used
--   **React**: For building the UI components.
--   **Tailwind CSS**: For styling (I love utility classes!).
--   **Firebase**: For login (Google/Email) and database stuff.
--   **React Router**: To move between pages.
--   **Swiper**: For the cool sliders.
+- **React 18** + **Vite 7**
+- **Tailwind CSS 3.4** with a custom brand token set (`tailwindcss-animate` plugin)
+- **framer-motion** for entrance/hover motion
+- **lucide-react** for icons
+- **react-router-dom** for routing
+- **Firebase** (Auth) for login and accounts
+- **@fontsource-variable** for local Baloo 2 + Nunito fonts
 
-## ✨ Features
--   Login with Google or Email (Firebase auth is cool!)
--   See lots of toys
--   Search for toys
--   See details (price, rating, description)
--   Mobile friendly (I think/hope)
+> Note: `daisyui`, `swiper`, `aos`, `lottie-react`, and `react-spinners` remain in `package.json` as legacy dependencies, but the current UI is hand-built with Tailwind tokens and is not dependent on them.
 
-## 🐛 Bugs?
-If you find bugs, please tell me! safely ignore console warnings if you see any hehe.
+## Getting started
 
----
+### Prerequisites
 
+- Node.js 18+
+- A Firebase project (for authentication)
+
+### Install
+
+```bash
+npm install
+```
+
+### Environment
+
+Create a `.env` file in the project root with your Firebase web config:
+
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+```
+
+Analytics is only initialized in production builds, so `VITE_FIREBASE_MEASUREMENT_ID` is optional for local development.
+
+### Run
+
+```bash
+npm run dev      # start the dev server (http://localhost:5173)
+npm run build    # production build to dist/
+npm run preview  # preview the production build
+```
+
+## Project structure
+
+```
+src/
+  assets/        # local images (hero + product photos) and generated tiles
+  components/    # Navbar, Footer, Brand (logo/icons), Shared/ToyCard, ui/*
+  data/          # toys.js (local product catalog)
+  lib/           # cart.js (localStorage-backed cart)
+  pages/         # Home, AllToys, ToyDetails, Login, Register, ForgotPassword, Profile, Favorites, ErrorPage
+  config/        # firebase.js
+  context/       # AuthContext
+```
+
+## Notes
+
+- All product and hero imagery is bundled locally, so the app renders fully offline (no broken external image links).
+- Text and surface colors are tuned for AA contrast on the cream background.
+- The cart and wishlist persist in `localStorage` for the demo experience.
