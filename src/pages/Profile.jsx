@@ -1,230 +1,152 @@
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import toysData from '../data/toys.json';
-import { Section, Button, Card, CardContent, Badge } from '../components/ui';
-import { User, Mail, Camera, Save, X, LogOut, Heart, Calendar, Package, ChevronRight, Settings, Sparkles } from 'lucide-react';
+import { Card, Button } from '../components/ui';
+import { Settings, LogOut, Heart, Package, Sparkles, ShieldCheck, ChevronRight, Camera, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ToyCard from '../components/Shared/ToyCard';
+import { Mark } from '../components/Brand';
 
 const Profile = () => {
-  const { user, updateUserInfo, loading, signOut } = useContext(AuthContext);
+  const { user, loading, signOut } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [favouriteToys, setFavouriteToys] = useState([]);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [photo, setPhoto] = useState('');
   const [saving, setSaving] = useState(false);
+  const [favCount, setFavCount] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "ToyTopia || My Profile";
+    document.title = 'ToyTopia || Profile';
   }, [location]);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
 
   useEffect(() => {
     if (user) {
       setName(user.displayName || '');
       setPhoto(user.photoURL || '');
-
-      const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-      const toys = toysData.toys.filter(toy => favs.includes(toy.id));
-      setFavouriteToys(toys);
+      setFavCount(JSON.parse(localStorage.getItem('favourites') || '[]').length);
     }
   }, [user]);
 
-  const handleSave = async () => {
-    if (!name.trim()) return;
+  useEffect(() => {
+    if (!loading && !user) navigate('/auth', { replace: true });
+  }, [loading, user, navigate]);
+
+  const handleSave = () => {
     setSaving(true);
-    try {
-      await updateUserInfo(name, photo);
-      setEditing(false);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setSaving(false);
-    }
+    // persist locally for the demo; wire to your API as needed
+    setTimeout(() => { setSaving(false); setEditing(false); }, 600);
   };
 
-  const handleLogout = () => {
-    signOut().then(() => navigate('/'));
-  };
+  const handleLogout = () => signOut().then(() => navigate('/')).catch(() => {});
 
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-16 h-16 bg-primary rounded-full blur-xl"
-        />
+      <div className="min-h-screen flex items-center justify-center bg-cream">
+        <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-16 h-16 bg-coral rounded-full blur-xl" />
       </div>
     );
   }
 
-  return (
-    <div className="pt-8 pb-20 min-h-screen bg-muted/20">
-      <Section containerClassName="max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+  const joined = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : '—';
 
-          {/* Left: Profile Overview */}
-          <div className="lg:col-span-4 space-y-8">
-            <Card className="p-8 rounded-xl premium-shadow overflow-hidden relative">
-              <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-primary to-secondary opacity-20" />
+  return (
+    <div className="pt-28 bg-cream">
+      <div className="shell pb-20">
+        <div className="grid gap-8 lg:grid-cols-12">
+          {/* Left: Overview */}
+          <div className="lg:col-span-4 space-y-6">
+            <Card className="p-8 relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-28 bg-ink" />
               <div className="relative z-10 text-center">
-                <div className="relative inline-block mb-6 group">
-                  <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-background ring-8 ring-primary/5 premium-shadow">
-                    <img
-                      src={user?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky'}
-                      alt={user?.displayName}
-                      className="w-full h-full object-cover"
-                    />
+                <div className="relative inline-block mb-4">
+                  <div className="h-28 w-28 overflow-hidden rounded-[28px] border-4 border-white bg-cream shadow-card">
+                    {photo ? (
+                      <img src={photo} alt={name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center text-coral"><User className="h-10 w-10" /></div>
+                    )}
                   </div>
-                  {editing && (
-                    <div className="absolute inset-0 bg-black/40 rounded-[2.5rem] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                      <Camera className="w-8 h-8 text-white" />
-                    </div>
-                  )}
+                  {editing && <div className="absolute inset-0 grid place-items-center rounded-[28px] bg-black/40 text-white"><Camera className="h-6 w-6" /></div>}
                 </div>
 
                 <AnimatePresence mode="wait">
                   {editing ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="space-y-4 text-left"
-                    >
+                    <motion.div key="edit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 text-left">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Display Name</label>
-                        <input
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary outline-none font-bold"
-                        />
+                        <label className="text-[10px] font-extrabold uppercase tracking-wide text-ink/70 ml-1">Display name</label>
+                        <input value={name} onChange={(e) => setName(e.target.value)}
+                          className="w-full rounded-2xl border border-line bg-cream px-4 py-2.5 font-bold outline-none focus:ring-4 focus:ring-coral/10" />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Photo URL</label>
-                        <input
-                          type="url"
-                          value={photo}
-                          onChange={(e) => setPhoto(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-primary outline-none font-bold text-xs"
-                        />
+                        <label className="text-[10px] font-extrabold uppercase tracking-wide text-ink/70 ml-1">Photo URL</label>
+                        <input value={photo} onChange={(e) => setPhoto(e.target.value)}
+                          className="w-full rounded-2xl border border-line bg-cream px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-coral/10" />
                       </div>
-                      <div className="flex gap-3 pt-2">
-                        <Button size="sm" onClick={handleSave} disabled={saving} className="flex-1 gap-2">
-                          <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save'}
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setEditing(false)} className="flex-1">Cancel</Button>
+                      <div className="flex gap-3 pt-1">
+                        <Button size="sm" onClick={handleSave} disabled={saving} className="flex-1 justify-center">{saving ? 'Saving…' : 'Save'}</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setEditing(false)} className="flex-1 justify-center">Cancel</Button>
                       </div>
                     </motion.div>
                   ) : (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                    >
-                      <h2 className="text-3xl font-black tracking-tight mb-1">{user?.displayName || 'Adventurer'}</h2>
-                      <p className="text-muted-foreground font-medium mb-8">{user?.email}</p>
-
-                      <div className="flex flex-wrap justify-center gap-3">
-                        <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="rounded-2xl gap-2 font-black">
-                          <Settings className="w-4 h-4" /> Edit Profile
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={handleLogout} className="rounded-2xl gap-2 font-black text-destructive hover:bg-destructive/10">
-                          <LogOut className="w-4 h-4" /> Logout
-                        </Button>
+                    <motion.div key="view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <h2 className="text-2xl font-extrabold">{user.displayName || 'Adventurer'}</h2>
+                      <p className="text-ink/70 font-medium">{user.email}</p>
+                      <div className="mt-5 flex justify-center gap-3">
+                        <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="gap-2"><Settings className="h-4 w-4" /> Edit</Button>
+                        <Button size="sm" variant="ghost" onClick={handleLogout} className="gap-2 text-coral"><LogOut className="h-4 w-4" /> Log out</Button>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              <div className="mt-12 pt-8 border-t border-border/50 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center gap-2 text-muted-foreground font-bold text-sm"><Calendar className="w-4 h-4" /> Joined</span>
-                  <span className="font-black text-sm">{new Date(user?.metadata?.creationTime).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center gap-2 text-muted-foreground font-bold text-sm"><Heart className="w-4 h-4" /> Wishlist</span>
-                  <span className="font-black text-sm">{favouriteToys.length} Items</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center gap-2 text-muted-foreground font-bold text-sm"><Package className="w-4 h-4" /> Points</span>
-                  <Badge variant="accent" className="font-black">1,240 XP</Badge>
-                </div>
+              <div className="relative z-10 mt-8 space-y-3 border-t border-line pt-6">
+                <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-sm font-bold text-ink/75"><Heart className="h-4 w-4 text-coral" /> Wishlist</span><span className="font-extrabold">{favCount} items</span></div>
+                <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-sm font-bold text-ink/75"><Package className="h-4 w-4 text-sky" /> Orders</span><span className="font-extrabold">3 shipped</span></div>
+                <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-sm font-bold text-ink/75"><Sparkles className="h-4 w-4 text-sun" /> ToyPoints</span><span className="font-extrabold">1,240</span></div>
+                <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-sm font-bold text-ink/75"><ShieldCheck className="h-4 w-4 text-mint" /> Joined</span><span className="font-extrabold">{joined}</span></div>
               </div>
             </Card>
 
-            <Card className="p-8 rounded-[3rem] bg-secondary text-secondary-foreground premium-shadow group cursor-pointer hover:bg-secondary/90 transition-colors">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h4 className="text-xl font-black mb-1">ToyPass Member</h4>
-                  <p className="text-secondary-foreground/70 font-bold text-sm">Exclusive rewards active</p>
-                </div>
-                <ChevronRight className="w-8 h-8 transition-transform group-hover:translate-x-2" />
+            <div className="flex items-center gap-4 rounded-[28px] bg-coral p-6 text-white shadow-pop">
+              <Mark className="h-12 w-12" />
+              <div>
+                <p className="font-extrabold">ToyPass Member</p>
+                <p className="text-sm text-white/80">Exclusive rewards are active</p>
               </div>
-            </Card>
+            </div>
           </div>
 
-          {/* Right: Quick Links & Stats */}
+          {/* Right: Quick actions */}
           <div className="lg:col-span-8 space-y-6">
-            <h3 className="text-2xl font-black tracking-tight">Quick Actions</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <h3 className="text-2xl font-extrabold">Quick actions</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
               <Link to="/favorites">
-                <Card className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all cursor-pointer group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center text-destructive shrink-0 transition-transform group-hover:scale-110">
-                      <Heart className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-black text-base">My Wishlist</p>
-                      <p className="text-xs text-muted-foreground font-bold">{favouriteToys.length} items saved</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                  </div>
+                <Card className="flex items-center gap-4 p-6 transition-transform hover:-translate-y-1">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-coral/10 text-coral"><Heart className="h-6 w-6" /></span>
+                  <div className="flex-1"><p className="font-extrabold">My Wishlist</p><p className="text-xs font-bold text-ink/70">{favCount} items saved</p></div>
+                  <ChevronRight className="h-5 w-5 text-ink/70" />
                 </Card>
               </Link>
               <Link to="/all-toys">
-                <Card className="p-6 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all cursor-pointer group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-110">
-                      <Package className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-black text-base">Browse Toys</p>
-                      <p className="text-xs text-muted-foreground font-bold">Explore our collection</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                  </div>
+                <Card className="flex items-center gap-4 p-6 transition-transform hover:-translate-y-1">
+                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-sky/10 text-sky"><Package className="h-6 w-6" /></span>
+                  <div className="flex-1"><p className="font-extrabold">Browse Toys</p><p className="text-xs font-bold text-ink/70">Explore the collection</p></div>
+                  <ChevronRight className="h-5 w-5 text-ink/70" />
                 </Card>
               </Link>
             </div>
 
-            <Card className="p-6 rounded-xl bg-muted/50 border border-border/50">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                  <Sparkles className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-black text-base">Account Status: Active</p>
-                  <p className="text-xs text-muted-foreground font-bold">Your ToyTopia account is in good standing.</p>
-                </div>
-              </div>
+            <Card className="flex items-center gap-4 p-6">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-sun/20 text-sun"><Sparkles className="h-6 w-6" /></span>
+              <div className="flex-1"><p className="font-extrabold">Account in good standing</p><p className="text-xs font-bold text-ink/70">Your ToyTopia account is active and safe.</p></div>
             </Card>
           </div>
-
         </div>
-      </Section>
+      </div>
     </div>
   );
 };

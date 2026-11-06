@@ -1,97 +1,127 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* Surfaces — warm, paper-like */
+    --background: 40 38% 96%;     /* cream #FBF6EE */
+    --foreground: 24 23% 11%;      /* ink   #211C18 */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 24 23% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 24 23% 11%;
 
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand — refined, slightly desaturated */
+    --primary: 9 76% 56%;          /* coral #E2553F */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 262 83% 58%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 197 64% 49%;      /* sky   #2FA0CE */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 33 38% 91%;
+    --muted-foreground: 24 14% 38%; /* #6B5F54 — AA on cream */
 
-    --accent: 142 70% 45%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 41 84% 59%;          /* sun   #F0B23C */
+    --accent-foreground: 24 23% 11%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --border: 32 35% 87%;          /* line  #ECE0D0 */
+    --input: 32 35% 87%;
+    --ring: 9 76% 56%;
 
-    --radius: 1.25rem;
+    --radius: 1.5rem;
   }
 
-  .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
-
-    --secondary: 263 83% 65%;
-    --secondary-foreground: 222 47% 11%;
-
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 142 70% 55%;
-    --accent-foreground: 222 47% 11%;
-
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 224 76% 48%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
-    font-family: 'Plus Jakarta Sans', sans-serif;
   }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 7rem;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-cream text-ink font-body antialiased;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-display text-ink;
+    letter-spacing: -0.015em;
+    line-height: 1.08;
+  }
+
+  ::selection {
+    background: #fbe0db;
+    color: #211c18;
   }
 }
 
 @layer components {
-  .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  /* Page shell */
+  .shell {
+    @apply mx-auto w-full max-w-[1240px] px-5 sm:px-6 lg:px-8;
   }
-  .dark .glass {
-    @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-xl;
+
+  /* Buttons — solid, tactile, no cheap gradient */
+  .btn-toy {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-body font-extrabold
+           transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none
+           focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-coral/25;
   }
-  
-  .premium-shadow {
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+  .btn-coral {
+    @apply btn-toy bg-coral text-white px-6 py-3 shadow-[0_8px_20px_-6px_rgba(226,85,63,0.55)]
+           hover:bg-coral-dark;
   }
-  
-  .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl;
+  .btn-sun {
+    @apply btn-toy bg-sun text-ink px-6 py-3 shadow-[0_8px_20px_-6px_rgba(240,178,60,0.55)]
+           hover:bg-[#e3a52f];
+  }
+  .btn-outline-toy {
+    @apply btn-toy bg-white text-ink px-6 py-3 border border-line
+           hover:border-ink/20 hover:bg-cream;
+  }
+  .btn-ghost-toy {
+    @apply btn-toy text-ink/70 px-4 py-2 hover:bg-ink/5;
+  }
+
+  /* Surfaces */
+  .panel {
+    @apply rounded-[28px] bg-white border border-line shadow-card;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-extrabold
+           text-ink/70 border border-line;
+  }
+
+  /* Section eyebrow — small, quiet, no emoji */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full bg-coral/10 px-3.5 py-1.5
+           text-[11px] font-extrabold uppercase tracking-[0.14em] text-coral;
+  }
+
+  /* Pastel product tiles (muted, sophisticated) */
+  .tile-blush { background-color: #F7E4E1; }
+  .tile-butter { background-color: #F8EFD2; }
+  .tile-sky { background-color: #E4F1F8; }
+  .tile-sage { background-color: #E4F3EC; }
+  .tile-lilac { background-color: #EFEAFB; }
+  .tile-peach { background-color: #FBEADC; }
+
+  .link-arrow {
+    @apply inline-flex items-center gap-1.5 text-sm font-extrabold text-ink/60 transition-colors hover:text-coral;
   }
 }
 
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}

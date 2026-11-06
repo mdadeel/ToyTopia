@@ -1,131 +1,125 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { Button } from './ui';
-import { ShoppingBag, Heart, User, LogOut, Menu, X } from 'lucide-react';
+import { ShoppingBag, Heart, User, LogOut, Menu, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import logo from '/logo.png';
+import { Logo } from './Brand';
 
-const Navbar = () => {
+const links = [
+  { name: 'Home', path: '/' },
+  { name: 'All Toys', path: '/all-toys' },
+];
+
+export default function Navbar() {
   const { user, signOut } = useContext(AuthContext);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [cart, setCart] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const sync = () => setCart(JSON.parse(localStorage.getItem('toytopia_cart') || '[]').reduce((n, t) => n + (t.qty || 1), 0));
+    sync();
+    window.addEventListener('toytopia:cart', sync);
+    return () => window.removeEventListener('toytopia:cart', sync);
   }, []);
 
   const handleLogout = () => {
-    signOut().catch(error => console.log(error));
-    navigate("/");
+    signOut().catch(() => {});
+    setOpen(false);
+    navigate('/');
   };
 
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'All Toys', path: '/all-toys' },
-    ...(user ? [
-      { name: 'Favourites', path: '/favourites' },
-      { name: 'My Profile', path: '/profile' }
-    ] : [])
-  ];
+  const linkClass = ({ isActive }) =>
+    `relative font-extrabold text-sm transition-colors ${
+      isActive ? 'text-coral' : 'text-ink/70 hover:text-ink'
+    }`;
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-border/50 ${isScrolled ? 'bg-background/80 backdrop-blur-md py-3' : 'bg-background py-4'}`}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 flex items-center justify-center">
-            <img src={logo} alt="ToyTopia" className="w-full h-full object-contain" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">ToyTopia</span>
-        </Link>
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-cream/85 backdrop-blur-md shadow-[0_1px_0_#F0E2D4]' : 'bg-transparent'
+      }`}
+    >
+      <div className="shell flex h-20 items-center justify-between">
+        <Logo />
 
-        {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-10">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) => `
-                text-xs font-bold uppercase tracking-widest transition-all duration-300 hover:text-primary
-                ${isActive ? 'text-primary' : 'text-foreground/60'}
-              `}
-            >
-              {link.name}
+        <nav className="hidden items-center gap-8 md:flex">
+          {links.map((l) => (
+            <NavLink key={l.path} to={l.path} end={l.path === '/'} className={linkClass}>
+              {l.name}
             </NavLink>
           ))}
-        </div>
+          {user && (
+            <>
+              <NavLink to="/favourites" className={linkClass}>Favourites</NavLink>
+              <NavLink to="/profile" className={linkClass}>My Profile</NavLink>
+            </>
+          )}
+        </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Link to="/all-toys" className="hidden h-10 w-10 place-items-center rounded-full bg-white text-ink/75 shadow-card hover:text-coral sm:grid" aria-label="Search">
+            <Search className="h-5 w-5" />
+          </Link>
+          <Link to={user ? '/favourites' : '/auth'} className="relative grid h-10 w-10 place-items-center rounded-full bg-white text-ink/70 shadow-card hover:text-coral" aria-label="Cart">
+            <ShoppingBag className="h-5 w-5" />
+            {cart > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-coral px-1 text-[10px] font-extrabold text-white">
+                {cart}
+              </span>
+            )}
+          </Link>
+
           {user ? (
-            <div className="flex items-center gap-4">
-              <Link to="/favourites" className="text-foreground/60 hover:text-primary transition-colors">
-                <Heart className="w-5 h-5" />
-              </Link>
-              <div className="dropdown dropdown-end">
-                <label tabIndex={0} className="w-8 h-8 rounded-full overflow-hidden border border-border cursor-pointer block hover:border-primary transition-colors">
-                  <img src={user?.photoURL || 'https://i.ibb.co/ZYW3VTp/brown-brim.png'} className="w-full h-full object-cover" />
-                </label>
-                <ul tabIndex={0} className="dropdown-content mt-4 p-2 bg-background border border-border rounded-xl w-56 shadow-xl">
-                  <div className="px-3 py-2 border-b border-border mb-1">
-                    <p className="font-bold text-sm truncate">{user?.displayName}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
-                  </div>
-                  <li><Link to="/profile" className="flex items-center gap-2 p-2 hover:bg-muted rounded-lg transition-all text-xs font-bold"><User className="w-3.5 h-3.5" /> Profile</Link></li>
-                  <li><button onClick={handleLogout} className="w-full flex items-center gap-2 p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-all text-xs font-bold"><LogOut className="w-3.5 h-3.5" /> Logout</button></li>
-                </ul>
-              </div>
-            </div>
+            <button onClick={handleLogout} className="hidden items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-extrabold text-ink/70 shadow-card hover:text-coral md:inline-flex">
+              <LogOut className="h-4 w-4" /> Log out
+            </button>
           ) : (
-            <Link to="/auth">
-              <Button size="sm" className="rounded-lg px-6">Login</Button>
+            <Link to="/auth" className="hidden rounded-full bg-coral px-5 py-2.5 text-sm font-extrabold text-white shadow-[0_5px_0_-1px_#d63d33] transition-all hover:translate-y-[2px] hover:shadow-[0_3px_0_-1px_#d63d33] md:inline-flex">
+              Sign in
             </Link>
           )}
 
           <button
-            className="lg:hidden p-2 text-foreground/70"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() => setOpen((v) => !v)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink shadow-card md:hidden"
+            aria-label="Menu"
           >
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
       <AnimatePresence>
-        {isMobileMenuOpen && (
+        {open && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden fixed top-[65px] left-0 right-0 bg-background border-b border-border shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="md:hidden border-t border-line bg-cream/95 backdrop-blur-md"
           >
-            <div className="p-6 flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) => `
-                    text-sm font-bold uppercase tracking-widest p-2 transition-all
-                    ${isActive ? 'text-primary' : 'text-foreground/60'}
-                  `}
-                >
-                  {link.name}
+            <div className="shell flex flex-col gap-1 py-4">
+              {[...links, ...(user ? [{ name: 'Favourites', path: '/favourites' }, { name: 'My Profile', path: '/profile' }] : [])].map((l) => (
+                <NavLink key={l.path} to={l.path} end={l.path === '/'} onClick={() => setOpen(false)} className="rounded-2xl px-4 py-3 font-extrabold text-ink/80 hover:bg-white">
+                  {l.name}
                 </NavLink>
               ))}
-              {!user && (
-                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full rounded-lg mt-4">Login</Button>
-                </Link>
+              {user ? (
+                <button onClick={handleLogout} className="rounded-2xl px-4 py-3 text-left font-extrabold text-ink/80 hover:bg-white">Log out</button>
+              ) : (
+                <Link to="/auth" onClick={() => setOpen(false)} className="mt-1 rounded-full bg-coral px-4 py-3 text-center font-extrabold text-white">Sign in</Link>
               )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </header>
   );
-};
-
-export default Navbar;
+}

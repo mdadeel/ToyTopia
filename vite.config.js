@@ -11,6 +11,7 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
+    allowedHosts: [".e2b.app", "localhost"],
     // proxy: {
     //   '/api': 'http://localhost:5000'
     // }

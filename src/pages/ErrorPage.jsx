@@ -1,68 +1,32 @@
-import { Link } from "react-router-dom";
-import { Button, Section } from "../components/ui";
-import { Home, ArrowLeft, Ghost, AlertTriangle } from "lucide-react";
-import { motion } from "framer-motion";
+import { Link } from 'react-router-dom';
+import { Home, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Logo, EmptyToys } from '../components/Brand';
 
 const ErrorPage = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-      {/* Decorative Orbs */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/20 blur-3xl rounded-full animate-pulse" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/20 blur-3xl rounded-full" />
-
-      <Section containerClassName="max-w-2xl">
-        <div className="text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <div className="relative inline-block">
-              <motion.div
-                animate={{ y: [0, -20, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Ghost className="w-32 h-32 text-primary/40 mx-auto" />
-              </motion.div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <span className="text-8xl font-black text-foreground drop-shadow-2xl">404</span>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">Oops! You've drifted out of <span className="text-primary italic">Toy Orbit</span></h1>
-            <p className="text-muted-foreground text-xl mb-12 max-w-md mx-auto font-medium leading-relaxed">
-              We couldn't find the page you're searching for. It might have been relocated to a different galaxy.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/">
-                <Button size="lg" className="px-10 gap-2">
-                  <Home className="w-5 h-5" /> Back to Base
-                </Button>
-              </Link>
-              <Button variant="ghost" size="lg" className="px-10 gap-2 font-black" onClick={() => window.history.back()}>
-                <ArrowLeft className="w-5 h-5" /> Previous Page
-              </Button>
-            </div>
-          </motion.div>
-
-          <div className="mt-20 pt-10 border-t border-border/50">
-            <div className="flex items-center justify-center gap-2 text-muted-foreground text-xs font-black uppercase tracking-widest leading-none">
-              <AlertTriangle className="w-4 h-4 text-amber-500" /> Lost & Found Support: support@toypia.com
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-cream px-4 py-28">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center">
+        <div className="mb-4 flex justify-center">
+          <EmptyToys className="w-48 h-48" />
         </div>
-      </Section>
+        <span className="eyebrow mb-4">Page not found</span>
+        <h1 className="text-6xl font-extrabold">404</h1>
+        <p className="mt-4 text-lg text-ink/75">
+          Oops! This toy rolled under the sofa. Let's get you back to the fun.
+        </p>
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link to="/" className="btn-coral px-8 py-3.5">
+            <Home className="w-5 h-5" /> Back home
+          </Link>
+          <button onClick={() => window.history.back()} className="btn-outline-toy px-8 py-3.5">
+            <ArrowLeft className="w-5 h-5" /> Go back
+          </button>
+        </div>
+        <div className="mt-12"><Logo /></div>
+      </motion.div>
     </div>
   );
 };
-
-
 
 export default ErrorPage;

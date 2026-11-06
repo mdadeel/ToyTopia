@@ -1,8 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import { Section, Card, Button } from '../components/ui';
-import { KeyRound, Mail, ArrowLeft, Sparkles, CheckCircle2, ChevronRight } from 'lucide-react';
+import { KeyRound, Mail, ArrowLeft, CheckCircle2, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ForgotPassword = () => {
@@ -16,18 +15,14 @@ const ForgotPassword = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "ToyTopia || Reset Access";
-
-    if (location.state?.email) {
-      setEmail(location.state.email);
-    }
+    document.title = 'ToyTopia || Reset password';
+    if (location.state?.email) setEmail(location.state.email);
   }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!email) return setError("Please enter your email");
-
+    if (!email) return setError('Please enter your email');
     setLoading(true);
     try {
       await resetPassword(email);
@@ -41,103 +36,51 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32 pb-24 bg-muted/20 relative overflow-hidden flex items-center">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 -skew-x-12 translate-x-1/2" />
+    <div className="min-h-screen flex items-center justify-center bg-cream px-4 py-28">
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md rounded-[36px] bg-white border border-line p-8 sm:p-10 shadow-card">
+        <Link to="/auth" className="inline-flex items-center gap-2 mb-6 text-ink/75 hover:text-coral font-extrabold">
+          <ArrowLeft className="w-4 h-4" /> Back to login
+        </Link>
 
-      <Section containerClassName="max-w-xl relative z-10 w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", damping: 20 }}
-        >
-          <Card className="p-12 rounded-[3.5rem] premium-shadow border-white/40 glass">
-            <div className="text-center mb-12">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <KeyRound className="w-10 h-10 text-primary" />
-              </div>
-              <h1 className="text-4xl font-black mb-3 tracking-tight">Lost your <span className="text-secondary italic">Key?</span></h1>
-              <p className="text-muted-foreground font-medium">No worries! Magic is just an email away.</p>
-            </div>
+        <AnimatePresence mode="wait">
+          {submitted ? (
+            <motion.div key="done" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
+              <span className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-mint/15 text-mint">
+                <CheckCircle2 className="h-8 w-8" />
+              </span>
+              <h1 className="mt-5 text-3xl font-extrabold">Check your inbox!</h1>
+              <p className="mt-2 text-ink/75">
+                We sent a reset link to <span className="font-extrabold text-ink">{email}</span>. We also opened Gmail for you.
+              </p>
+              <button onClick={() => setSubmitted(false)} className="btn-outline-toy mt-7 w-full justify-center">Use another email</button>
+            </motion.div>
+          ) : (
+            <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-coral/10 text-coral">
+                <KeyRound className="h-8 w-8" />
+              </span>
+              <h1 className="mt-5 text-3xl font-extrabold">Forgot your password?</h1>
+              <p className="mt-2 text-ink/75">No worries — we'll send a magic reset link right away.</p>
 
-            <AnimatePresence mode="wait">
-              {submitted ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-4"
-                >
-                  <div className="bg-emerald-50 text-emerald-700 p-8 rounded-[2.5rem] border border-emerald-100 mb-8">
-                    <CheckCircle2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-black text-lg mb-2">Instructions Sent!</p>
-                    <p className="font-medium text-sm opacity-80 leading-relaxed">
-                      Check <span className="font-black">{email}</span> for your reset link. We've also opened Gmail for you.
-                    </p>
+              <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-extrabold uppercase tracking-wide text-ink/70 ml-1">Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink/70" />
+                    <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-cream border border-line focus:ring-4 focus:ring-coral/10 focus:border-coral outline-none font-bold transition-all" required />
                   </div>
-
-                  <div className="space-y-4">
-                    <Button variant="outline" className="w-full rounded-2xl font-black gap-2 h-14" onClick={() => setSubmitted(false)}>
-                      Try another email
-                    </Button>
-                    <Link to="/auth" className="block p-4 font-black text-sm text-primary hover:text-primary/80 transition-colors">
-                      Back to Login
-                    </Link>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.form
-                  onSubmit={handleSubmit}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="space-y-6"
-                >
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Email Identity</label>
-                    <div className="relative group">
-                      <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      <input
-                        type="email"
-                        placeholder="your@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-14 pr-6 py-5 rounded-2xl bg-muted border border-border focus:border-primary outline-none font-bold transition-all focus:ring-4 ring-primary/5"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {error && (
-                    <motion.p
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="text-destructive text-center text-sm font-black"
-                    >
-                      {error}
-                    </motion.p>
-                  )}
-
-                  <Button type="submit" size="lg" className="w-full h-16 rounded-2xl text-lg font-black gap-3 mt-4" disabled={loading}>
-                    {loading ? 'Sending Magic...' : 'Request Reset Link'}
-                    {!loading && <ChevronRight className="w-6 h-6" />}
-                  </Button>
-
-                  <div className="text-center pt-4">
-                    <Link to="/auth" className="inline-flex items-center gap-2 text-sm font-black text-muted-foreground hover:text-primary transition-colors group">
-                      <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Back to Login
-                    </Link>
-                  </div>
-                </motion.form>
-              )}
-            </AnimatePresence>
-          </Card>
-
-          <div className="mt-12 text-center">
-            <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
-              <Sparkles className="w-3 h-3" /> Secure Magic Link Protocol <Sparkles className="w-3 h-3" />
-            </div>
-          </div>
-        </motion.div>
-      </Section>
+                </div>
+                {error && <p className="text-coral text-sm font-extrabold">{error}</p>}
+                <button type="submit" disabled={loading} className="btn-coral w-full py-4 text-lg justify-center">
+                  {loading ? 'Sending…' : <>Send reset link <ChevronRight className="w-5 h-5" /></>}
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };

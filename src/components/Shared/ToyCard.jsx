@@ -1,91 +1,82 @@
-import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../../contexts/AuthContext';
-import { Card, CardHeader, CardContent, CardFooter, Badge, Button } from '../ui';
-import { Heart, Star, Eye, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Plus, Heart } from 'lucide-react';
+import { Stars } from '../Brand';
+import { CATEGORIES } from '../../data/toys';
 
-const ToyCard = ({ toy }) => {
-    const { id, name, description, price, image, category, rating } = toy;
-    const { user } = useContext(AuthContext);
-    const [isLiked, setIsLiked] = useState(false);
+const tileFor = (cat) => (CATEGORIES.find((c) => c.slug === cat) || {}).tile || 'tile-butter';
 
-    useEffect(() => {
-        const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-        setIsLiked(favs.includes(id));
-    }, [id]);
-
-    const handleLike = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!user) {
-            alert("Please login first");
-            return;
-        }
-        let favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-        if (favs.includes(id)) {
-            favs = favs.filter(f => f !== id);
-        } else {
-            favs.push(id);
-        }
-        localStorage.setItem('favourites', JSON.stringify(favs));
-        setIsLiked(!isLiked);
-    };
-
-    return (
-        <Card className="group flex flex-col h-full bg-background border border-border/50 hover:border-primary/30 transition-all duration-300 rounded-xl overflow-hidden shadow-sm">
-            <Link to={`/toy/${id}`} className="block relative aspect-[4/5] overflow-hidden">
-                {image ? (
-                    <img
-                        src={image}
-                        alt={name}
-                        className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center text-xs font-bold uppercase tracking-widest text-muted-foreground">No Image</div>
-                )}
-
-                {/* Fixed Badge */}
-                <div className="absolute top-3 left-3">
-                    <Badge variant="secondary" className="bg-background/90 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border-none rounded-md px-2 py-1 shadow-sm">
-                        {category}
-                    </Badge>
-                </div>
-
-                {/* Like Button */}
-                <button
-                    onClick={handleLike}
-                    className={`absolute top-3 right-3 p-2 rounded-lg bg-background/90 backdrop-blur-sm border border-border shadow-sm transition-all hover:scale-110 ${isLiked ? 'text-destructive' : 'text-foreground/40 hover:text-destructive'}`}
-                >
-                    <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-                </button>
-            </Link>
-
-            <div className="p-3 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-2 gap-2">
-                    <h3 className="font-bold text-base leading-tight group-hover:text-primary transition-colors line-clamp-1">{name}</h3>
-                    <div className="flex items-center gap-1 shrink-0 text-amber-500">
-                        <Star className="w-3 h-3 fill-current" />
-                        <span className="text-[10px] font-black">{rating}</span>
-                    </div>
-                </div>
-
-                <p className="text-muted-foreground text-xs line-clamp-2 mb-4 leading-relaxed font-medium">
-                    {description}
-                </p>
-
-                <div className="mt-auto pt-4 border-t border-border/50 flex items-center justify-between">
-                    <div className="flex flex-col">
-                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Price</span>
-                        <span className="text-base font-black text-foreground">${price}</span>
-                    </div>
-                    <Button size="sm" className="rounded-lg font-bold text-[11px] uppercase tracking-widest px-4 h-9 gap-2">
-                        <ShoppingBag size={14} /> Add
-                    </Button>
-                </div>
-            </div>
-        </Card>
-    );
+const tagTone = {
+  'Best Seller': 'bg-coral',
+  'Top Rated': 'bg-grape',
+  New: 'bg-sky',
 };
 
-export default ToyCard;
+export default function ToyCard({ toy, onAdd, onFav, favourite }) {
+  const tile = tileFor(toy.category);
+
+  return (
+    <motion.article
+      whileHover={{ y: -6 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      className="group relative flex flex-col overflow-hidden rounded-[28px] bg-white border border-line shadow-card hover:shadow-pop"
+    >
+      {/* Image */}
+      <Link to={`/toy/${toy.id}`} className="relative block">
+        <div className={`relative aspect-[4/3] ${tile} flex items-center justify-center overflow-hidden`}>
+          <img
+            src={toy.image}
+            alt={toy.name}
+            loading="lazy"
+            className="h-[88%] w-[88%] object-contain drop-shadow-[0_12px_18px_rgba(44,30,20,0.16)] transition-transform duration-500 group-hover:scale-105"
+          />
+          {toy.tag && (
+            <span className={`absolute top-3 left-3 inline-flex items-center rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white ${tagTone[toy.tag] || 'bg-sun'} shadow`}>
+              {toy.tag}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); onFav && onFav(toy); }}
+            className={`absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 backdrop-blur shadow-sm transition hover:scale-110 ${favourite ? 'text-coral' : 'text-ink/70'}`}
+            aria-label="Save to favourites"
+          >
+            <Heart className="h-4 w-4" fill={favourite ? 'currentColor' : 'none'} />
+          </button>
+        </div>
+      </Link>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-1 flex items-center justify-between">
+          <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-ink/70">{toy.categoryLabel}</span>
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-ink/70">
+            <Stars value={toy.rating} size={13} />
+            <span className="text-ink/70">({toy.reviews})</span>
+          </span>
+        </div>
+
+        <Link to={`/toy/${toy.id}`} className="mt-0.5">
+          <h3 className="text-lg font-extrabold leading-snug text-ink transition-colors group-hover:text-coral">
+            {toy.name}
+          </h3>
+        </Link>
+        <p className="mt-1.5 line-clamp-2 text-sm text-ink/70">{toy.description}</p>
+
+        <div className="mt-4 flex items-center justify-between pt-1">
+          <div>
+            <span className="text-2xl font-extrabold text-ink">{toy.priceLabel}</span>
+            <span className="ml-1 text-xs font-semibold text-ink/70">/ toy</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => onAdd && onAdd(toy)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-coral px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_6px_0_-1px_#d63d33] transition-all hover:bg-coral-dark hover:translate-y-[2px] hover:shadow-[0_4px_0_-1px_#d63d33] active:translate-y-1"
+          >
+            <Plus className="h-4 w-4" strokeWidth={3} /> Add
+          </button>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
