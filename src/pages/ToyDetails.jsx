@@ -141,7 +141,7 @@ export default function ToyDetails() {
         {related.length > 0 && (
           <div className="mt-14 mb-6">
             <h2 className="mb-6 text-2xl font-extrabold">More from {toy.categoryLabel}</h2>
-            <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+            <div className="cv-auto grid grid-cols-2 gap-6 lg:grid-cols-4">
               {related.map((r) => (
                 <Link key={r.id} to={`/toy/${r.id}`} className="group panel overflow-hidden transition-transform hover:-translate-y-1">
                   <div className={`${cat?.tile} flex h-40 items-center justify-center`}>

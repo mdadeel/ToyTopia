@@ -18,8 +18,16 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener('scroll', onScroll);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 12);
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -43,8 +51,8 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-cream/85 backdrop-blur-md shadow-[0_1px_0_#F0E2D4]' : 'bg-transparent'
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ${
+        scrolled ? 'bg-cream shadow-[0_1px_0_#ECE0D0]' : 'bg-transparent'
       }`}
     >
       <div className="shell flex h-20 items-center justify-between">

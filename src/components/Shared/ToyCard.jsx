@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Plus, Heart } from 'lucide-react';
 import { Stars } from '../Brand';
 import { CATEGORIES } from '../../data/toys';
@@ -16,11 +15,7 @@ export default function ToyCard({ toy, onAdd, onFav, favourite }) {
   const tile = tileFor(toy.category);
 
   return (
-    <motion.article
-      whileHover={{ y: -6 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="group relative flex flex-col overflow-hidden rounded-[28px] bg-white border border-line shadow-card hover:shadow-pop"
-    >
+    <article className="group relative flex flex-col overflow-hidden rounded-[28px] bg-white border border-line shadow-card transition-transform duration-300 will-change-transform hover:-translate-y-1.5 hover:shadow-pop">
       {/* Image */}
       <Link to={`/toy/${toy.id}`} className="relative block">
         <div className={`relative aspect-[4/3] ${tile} flex items-center justify-center overflow-hidden`}>
@@ -38,7 +33,7 @@ export default function ToyCard({ toy, onAdd, onFav, favourite }) {
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); onFav && onFav(toy); }}
-            className={`absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 backdrop-blur shadow-sm transition hover:scale-110 ${favourite ? 'text-coral' : 'text-ink/70'}`}
+            className={`absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-white shadow-sm transition hover:scale-110 ${favourite ? 'text-coral' : 'text-ink/70'}`}
             aria-label="Save to favourites"
           >
             <Heart className="h-4 w-4" fill={favourite ? 'currentColor' : 'none'} />
@@ -77,6 +72,6 @@ export default function ToyCard({ toy, onAdd, onFav, favourite }) {
           </button>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
