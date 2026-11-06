@@ -131,7 +131,7 @@ export default function AllToys() {
             <Link to="/all-toys" className="btn-outline-toy mt-6">Back to all toys</Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="cv-auto grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((t) => (
               <ToyCard key={t.id} toy={t} onAdd={handleAdd} />
             ))}

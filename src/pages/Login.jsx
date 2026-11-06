@@ -4,7 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Sparkles, Truck, ShieldCheck, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Logo } from '../components/Brand';
-import hero from '../assets/raw/hero-1.png';
+import hero from '../assets/hero.jpg';
 
 const Login = () => {
   const { userLogin, googleSign, user, loading } = useContext(AuthContext);

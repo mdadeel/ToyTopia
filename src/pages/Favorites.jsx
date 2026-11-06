@@ -89,7 +89,7 @@ const Favourites = () => {
             <Link to="/all-toys" className="btn-coral mt-6 px-8 py-3.5">Start exploring <ArrowRight className="h-5 w-5" /></Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="cv-auto grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {favToys.map((toy, i) => (
               <motion.div key={toy.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <ToyCard toy={toy} onFav={toggleFav} favourite={favIds.includes(toy.id)} />

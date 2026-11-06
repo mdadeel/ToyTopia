@@ -7,7 +7,7 @@ import { Button } from '../components/ui';
 import { CATEGORIES, toys } from '../data/toys';
 import { CATEGORY_ICON } from '../components/Brand';
 import { addToCart } from '../lib/cart';
-import hero from '../assets/raw/hero-1.png';
+import hero from '../assets/hero.jpg';
 
 const trust = [
   { icon: Truck, title: 'Free shipping', sub: 'On orders over $50' },
@@ -151,7 +151,7 @@ export default function Home() {
           </div>
           <Link to="/all-toys" className="link-arrow">View all <ArrowRight className="h-4 w-4" /></Link>
         </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="cv-auto grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {toys.slice(0, 8).map((t) => (
             <ToyCard key={t.id} toy={t} onAdd={handleAdd} />
           ))}

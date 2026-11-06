@@ -4,7 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { User, Mail, Lock, Image as ImageIcon, Eye, EyeOff, ArrowLeft, Gift, Heart, Package, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Logo } from '../components/Brand';
-import hero from '../assets/raw/hero-1.png';
+import hero from '../assets/hero.jpg';
 
 const Register = () => {
   const { createuser, user, loading } = useContext(AuthContext);
