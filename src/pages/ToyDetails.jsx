@@ -1,249 +1,173 @@
-import { useEffect, useState, useContext } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
-import toysData from '../data/toys.json';
-import { Button, Section, Badge, Card } from '../components/ui';
-import { Heart, Star, Truck, ShieldCheck, User, Mail, MapPin, Package, Clock, Box, CheckCircle2, ChevronLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Star, Heart, Truck, ShieldCheck, RotateCcw, Plus, Check, ArrowLeft, Sparkles,
+} from 'lucide-react';
+import { toys, CATEGORIES } from '../data/toys';
+import { Stars } from '../components/Brand';
+import { addToCart } from '../lib/cart';
 
-const ToyDetails = () => {
+export default function ToyDetails() {
   const { id } = useParams();
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [toy, setToy] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [liked, setLiked] = useState(false);
-
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const toy = toys.find((t) => t.id === id);
+  const [fav, setFav] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [qty, setQty] = useState(1);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0 });
+    setQty(1);
+  }, [id]);
 
-    if (!user) {
-      navigate('/auth', { state: { from: location } });
-      return;
-    }
-
-    const found = toysData.toys.find(t => t.id === id);
-    if (!found) {
-      navigate('/');
-      return;
-    }
-
-    setToy(found);
-    document.title = `${found.name} || ToyTopia`;
-    setLoading(false);
-
-    const favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-    setLiked(favs.includes(id));
-  }, [id, user, navigate, location]);
-
-  const handleLike = () => {
-    let favs = JSON.parse(localStorage.getItem('favourites') || '[]');
-    if (favs.includes(id)) {
-      favs = favs.filter(f => f !== id);
-    } else {
-      favs.push(id);
-    }
-    localStorage.setItem('favourites', JSON.stringify(favs));
-    setLiked(!liked);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!name || !email) return;
-    setSubmitted(true);
-    setName('');
-    setEmail('');
-  };
-
-  if (loading || !toy) {
+  if (!toy) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-16 h-16 bg-primary rounded-full blur-xl"
-        />
+      <div className="shell flex min-h-[60vh] flex-col items-center justify-center text-center pt-28">
+        <p className="text-2xl font-extrabold">Oops! We couldn't find that toy.</p>
+        <Link to="/all-toys" className="btn-coral mt-6">Back to the toys</Link>
       </div>
     );
   }
 
+  const cat = CATEGORIES.find((c) => c.slug === toy.category);
+  const related = toys.filter((t) => t.category === toy.category && t.id !== toy.id).slice(0, 4);
+
+  const handleAdd = () => {
+    for (let i = 0; i < qty; i++) addToCart(toy);
+    setToast(`${qty} × ${toy.name} added to your bag`);
+    setTimeout(() => setToast(null), 2200);
+  };
+
+  const perks = [
+    { icon: Truck, label: 'Free shipping over $50' },
+    { icon: ShieldCheck, label: 'Safety tested & non-toxic' },
+    { icon: RotateCcw, label: '30-day easy returns' },
+  ];
+
   return (
-    <div className="pt-2 pb-20 min-h-screen bg-muted/20">
-      <Section containerClassName="max-w-6xl">
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary font-bold mb-8 transition-colors group"
-        >
-          <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" /> Back to Collection
-        </button>
+    <div className="pt-28">
+      <div className="shell">
+        <Link to="/all-toys" className="link-arrow mb-6 inline-flex"><ArrowLeft className="h-4 w-4" /> All toys</Link>
 
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Media */}
-          <div className="lg:col-span-6 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative aspect-square rounded-xl overflow-hidden shadow-sm border border-border/50 group bg-background"
+        <div className="grid gap-10 lg:grid-cols-2">
+          {/* Image */}
+          <div className={`${cat?.tile || 'tile-butter'} relative flex items-center justify-center overflow-hidden rounded-[40px] border border-line shadow-card p-8`}>
+            <img
+              src={toy.image}
+              alt={toy.name}
+              className="h-[340px] w-[340px] object-contain drop-shadow-[0_18px_24px_rgba(44,30,20,0.18)] sm:h-[420px] sm:w-[420px]"
+            />
+            {toy.tag && (
+              <span className="absolute left-5 top-5 rounded-full bg-coral px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-white shadow">
+                {toy.tag}
+              </span>
+            )}
+            <button
+              onClick={() => setFav((v) => !v)}
+              className={`absolute right-5 top-5 grid h-11 w-11 place-items-center rounded-full bg-white/90 shadow transition hover:scale-110 ${fav ? 'text-coral' : 'text-ink/70'}`}
+              aria-label="Save"
             >
-              {toy.image ? (
-                <img src={toy.image} alt={toy.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <Package className="w-20 h-20 text-muted-foreground" />
-                </div>
-              )}
-              {toy.availableQuantity < 5 && (
-                <div className="absolute top-4 left-4 px-3 py-1 bg-destructive text-destructive-foreground rounded-full text-[10px] font-black animate-pulse uppercase tracking-wider">
-                  Only {toy.availableQuantity} left!
-                </div>
-              )}
-
-              <button
-                onClick={handleLike}
-                className={`absolute top-4 right-4 p-3 rounded-xl glass transition-all ${liked ? 'text-destructive bg-destructive/10' : 'text-foreground/70 hover:text-destructive'}`}
-              >
-                <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
-              </button>
-            </motion.div>
-
-            {/* Request Demo Section */}
-            <Card className="bg-primary text-primary-foreground p-8 rounded-xl premium-shadow overflow-hidden relative">
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 blur-3xl rounded-full" />
-              <div className="relative z-10">
-                <h3 className="text-2xl font-black mb-3 flex items-center gap-3">
-                  <Clock className="w-7 h-7" /> Request a Demo
-                </h3>
-                <p className="text-primary-foreground/80 mb-6 text-sm font-medium">Want to see it in action before buying? Our experts can show you via video call.</p>
-
-                {submitted ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center py-6"
-                  >
-                    <CheckCircle2 className="w-12 h-12 mb-3 text-accent" />
-                    <p className="text-lg font-black">Request Sent Successfully!</p>
-                    <p className="text-primary-foreground/70 text-sm">We'll reach out within 2-4 hours.</p>
-                  </motion.div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-3">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <input
-                        type="text"
-                        placeholder="Your Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
-                        required
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email Address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white/20 focus:border-white transition-all font-bold placeholder:text-white/40"
-                        required
-                      />
-                    </div>
-                    <Button variant="secondary" className="w-full py-4 text-xs font-black uppercase tracking-widest rounded-xl" type="submit">
-                      Book Free Demo Session
-                    </Button>
-                  </form>
-                )}
-              </div>
-            </Card>
+              <Heart className="h-5 w-5" fill={fav ? 'currentColor' : 'none'} />
+            </button>
           </div>
 
-          {/* Right Column: Info */}
-          <div className="lg:col-span-6 space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold uppercase tracking-widest text-[10px] px-3">
-                  {toy.category}
-                </Badge>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 font-black text-[10px] uppercase tracking-wider border border-amber-500/20">
-                  <Star className="w-3 h-3 fill-current" /> {toy.rating} Consumer Rating
-                </div>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-black mb-4 leading-tight tracking-tight text-foreground">{toy.name}</h1>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-xl">{toy.description}</p>
-            </motion.div>
+          {/* Info */}
+          <div>
+            <span className="text-sm font-extrabold uppercase tracking-[0.12em] text-ink/70">{toy.categoryLabel}</span>
+            <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{toy.name}</h1>
 
-            {/* Specs Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'Age Group', value: toy.age_group || '3+ Years', icon: User, color: 'text-blue-500 bg-blue-50' },
-                { label: 'Material', value: toy.material || 'Safe & Non-Toxic', icon: Box, color: 'text-green-500 bg-green-50' },
-                { label: 'Stock Status', value: `${toy.availableQuantity} available`, icon: Package, color: 'text-purple-500 bg-purple-50' },
-                { label: 'Express Dist.', value: '2-3 Business Days', icon: Truck, color: 'text-amber-500 bg-amber-50' },
-              ].map((spec, i) => (
-                <div key={i} className="flex flex-col p-4 rounded-xl bg-card border border-border/50 transition-colors hover:border-primary/20">
-                  <div className={`w-10 h-10 rounded-lg ${spec.color} flex items-center justify-center mb-4`}>
-                    <spec.icon className="w-5 h-5" />
-                  </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{spec.label}</p>
-                  <p className="text-sm font-black">{spec.value}</p>
+            <div className="mt-3 flex items-center gap-3">
+              <Stars value={toy.rating} size={18} />
+              <span className="font-extrabold">{toy.rating}</span>
+              <span className="text-sm font-semibold text-ink/70">({toy.reviews} happy reviews)</span>
+            </div>
+
+            <p className="mt-5 text-lg text-ink/65">{toy.description}</p>
+
+            <div className="mt-6 flex items-end gap-3">
+              <span className="text-4xl font-extrabold text-ink">{toy.priceLabel}</span>
+              <span className="mb-1 text-sm font-semibold text-ink/70">/ toy · tax included</span>
+            </div>
+
+            {/* Quantity + Add */}
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1 rounded-full bg-white p-1 shadow-card">
+                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="grid h-10 w-10 place-items-center rounded-full font-extrabold text-ink/70 hover:bg-cream">−</button>
+                <span className="w-8 text-center font-extrabold">{qty}</span>
+                <button onClick={() => setQty((q) => q + 1)} className="grid h-10 w-10 place-items-center rounded-full font-extrabold text-ink/70 hover:bg-cream">+</button>
+              </div>
+              <button onClick={handleAdd} className="btn-coral px-8 py-3.5">
+                <Plus className="h-5 w-5" strokeWidth={3} /> Add to bag
+              </button>
+            </div>
+
+            {/* Perks */}
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              {perks.map((p) => (
+                <div key={p.label} className="rounded-2xl bg-white p-4 text-center shadow-card">
+                  <span className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-sun/20 text-sun">
+                    <p.icon className="h-4 w-4" />
+                  </span>
+                  <p className="mt-2 text-xs font-extrabold leading-tight text-ink/70">{p.label}</p>
                 </div>
               ))}
             </div>
 
-            {/* Price & Action Box */}
-            <div className="p-8 rounded-xl bg-card border border-border/50 shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px] mb-1">Guaranteed Price</p>
-                  <p className="text-4xl font-black text-primary">${toy.price}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <Badge variant="accent" className="px-3 py-1 text-[10px] uppercase tracking-wider font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5 inline mr-1.5" /> Authorized Dealer
-                  </Badge>
-                </div>
+            {/* Quick specs */}
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-cream p-4">
+                <p className="text-xs font-extrabold uppercase tracking-wide text-ink/70">Age</p>
+                <p className="mt-1 font-extrabold">{toy.age}</p>
               </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="flex-1 rounded-xl font-bold text-xs uppercase tracking-widest h-14">
-                  Add to Shopping Bag
-                </Button>
-                <Button variant="outline" size="lg" onClick={handleLike} className={`flex-1 rounded-xl font-bold text-xs uppercase tracking-widest h-14 gap-2 ${liked ? 'bg-destructive/5 text-destructive border-destructive/20' : ''}`}>
-                  <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} /> {liked ? 'In Favorites' : 'Add to Wishlist'}
-                </Button>
+              <div className="rounded-2xl bg-cream p-4">
+                <p className="text-xs font-extrabold uppercase tracking-wide text-ink/70">Material</p>
+                <p className="mt-1 font-extrabold">{toy.material}</p>
               </div>
-            </div>
-
-            {/* Seller Info */}
-            <div className="glass p-6 rounded-xl flex flex-col md:flex-row md:items-center gap-6 border-white/20">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-black shadow-lg">
-                {toy.seller_name?.[0] || 'S'}
-              </div>
-              <div className="flex-1">
-                <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Seller Information</h4>
-                <div className="space-y-1">
-                  <p className="text-xl font-black">{toy.seller_name}</p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1">
-                    <p className="flex items-center gap-2 text-muted-foreground text-xs font-bold"><Mail className="w-3.5 h-3.5" /> {toy.seller_email}</p>
-                    <p className="flex items-center gap-2 text-muted-foreground text-xs font-bold"><MapPin className="w-3.5 h-3.5" /> {toy.seller_info}</p>
-                  </div>
-                </div>
-              </div>
-              <Button variant="ghost" size="sm" className="font-bold text-primary hover:bg-primary/5 uppercase tracking-widest text-[10px]">
-                View Store →
-              </Button>
             </div>
           </div>
         </div>
-      </Section>
+
+        {/* Why kids love it */}
+        <div className="mt-14 panel p-8 sm:p-10">
+          <h2 className="text-2xl font-extrabold">Why little ones love it <Sparkles className="inline h-5 w-5 text-sun" /></h2>
+          <ul className="mt-5 grid gap-4 sm:grid-cols-3">
+            <li className="flex gap-3"><Check className="mt-0.5 h-5 w-5 shrink-0 text-mint" /><span className="text-ink/70">Bright, friendly colours that spark curiosity.</span></li>
+            <li className="flex gap-3"><Check className="mt-0.5 h-5 w-5 shrink-0 text-mint" /><span className="text-ink/70">Built tough for everyday play (and the occasional drop).</span></li>
+            <li className="flex gap-3"><Check className="mt-0.5 h-5 w-5 shrink-0 text-mint" /><span className="text-ink/70">Perfect size for small hands to grab and explore.</span></li>
+          </ul>
+        </div>
+
+        {/* Related */}
+        {related.length > 0 && (
+          <div className="mt-14 mb-6">
+            <h2 className="mb-6 text-2xl font-extrabold">More from {toy.categoryLabel}</h2>
+            <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+              {related.map((r) => (
+                <Link key={r.id} to={`/toy/${r.id}`} className="group panel overflow-hidden transition-transform hover:-translate-y-1">
+                  <div className={`${cat?.tile} flex h-40 items-center justify-center`}>
+                    <img src={r.image} alt={r.name} className="h-[80%] w-[80%] object-contain transition-transform group-hover:scale-105" />
+                  </div>
+                  <div className="p-4">
+                    <p className="font-extrabold leading-snug">{r.name}</p>
+                    <p className="mt-1 font-extrabold text-coral">{r.priceLabel}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }}
+            className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-ink px-6 py-3 text-sm font-extrabold text-cream shadow-pop"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-};
-
-export default ToyDetails;
+}

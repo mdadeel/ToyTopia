@@ -1,19 +1,21 @@
-import React from 'react';
-
-const Section = ({ children, title, subtitle, className = '', containerClassName = '', ...props }) => {
-    return (
-        <section className={`py-16 md:py-16 px-4 ${className}`} {...props}>
-            <div className={`max-w-7xl mx-auto ${containerClassName}`}>
-                {(title || subtitle) && (
-                    <div className="text-center mb-12 md:mb-16">
-                        {title && <h2 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight">{title}</h2>}
-                        {subtitle && <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{subtitle}</p>}
-                    </div>
-                )}
-                {children}
+export default function Section({ eyebrow, title, subtitle, action, children, className = '', containerClassName = '' }) {
+  return (
+    <section className={`py-14 sm:py-20 ${className}`}>
+      <div className={`shell ${containerClassName}`}>
+        {(eyebrow || title || action) && (
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-9">
+            <div className="max-w-2xl">
+              {eyebrow && <span className="eyebrow mb-3">{eyebrow}</span>}
+              {title && (
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-balance">{title}</h2>
+              )}
+              {subtitle && <p className="mt-3 text-ink/75 text-lg">{subtitle}</p>}
             </div>
-        </section>
-    );
-};
-
-export default Section;
+            {action}
+          </div>
+        )}
+        {children}
+      </div>
+    </section>
+  );
+}

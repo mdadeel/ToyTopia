@@ -15,7 +15,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
-const analytics = getAnalytics(app);
+
+// Only initialise analytics in production with a valid measurementId.
+// Skipping it in dev avoids noisy/failed network calls to Google.
+let analytics = null;
+if (import.meta.env.PROD && typeof window !== "undefined" && firebaseConfig.measurementId) {
+  try {
+    analytics = getAnalytics(app);
+  } catch (err) {
+    console.warn("Analytics unavailable:", err?.message);
+  }
+}
 
 export { auth, googleProvider, analytics };
 

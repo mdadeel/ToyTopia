@@ -1,18 +1,16 @@
-import React from 'react';
-
-const Badge = ({ children, variant = 'primary', className = '' }) => {
-    const variants = {
-        primary: 'bg-primary/10 text-primary border-primary/20',
-        secondary: 'bg-secondary/10 text-secondary border-secondary/20',
-        accent: 'bg-accent/10 text-accent border-accent/20',
-        outline: 'border-border text-muted-foreground',
-    };
-
-    return (
-        <span className={`px-3 py-1 text-xs font-bold rounded-full border ${variants[variant]} ${className}`}>
-            {children}
-        </span>
-    );
+const tones = {
+  coral: 'bg-coral text-white',
+  sun: 'bg-sun text-ink',
+  sky: 'bg-skysoft text-sky',
+  mint: 'bg-sage text-mint',
+  grape: 'bg-lilac text-grape',
+  ink: 'bg-ink text-white',
 };
 
-export default Badge;
+export default function Badge({ tone = 'sun', className = '', children }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide ${tones[tone] || tones.sun} ${className}`}>
+      {children}
+    </span>
+  );
+}

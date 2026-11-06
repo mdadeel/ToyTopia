@@ -1,255 +1,218 @@
-import { useEffect, useState, useContext } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Truck, ShieldCheck, RotateCcw, Smile, ArrowRight, Sparkles } from 'lucide-react';
 import ToyCard from '../components/Shared/ToyCard';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import toysData from '../data/toys.json';
-import { Button, Section, Badge } from '../components/ui';
-import { ShoppingBag, Truck, ShieldCheck, MapPin, Search, SlidersHorizontal, ArrowRight, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { Button } from '../components/ui';
+import { CATEGORIES, toys } from '../data/toys';
+import { CATEGORY_ICON } from '../components/Brand';
+import { addToCart } from '../lib/cart';
+import hero from '../assets/raw/hero-1.png';
 
-const Home = () => {
-  const toys = toysData.toys;
-  const location = useLocation();
+const trust = [
+  { icon: Truck, title: 'Free shipping', sub: 'On orders over $50' },
+  { icon: ShieldCheck, title: 'Safety tested', sub: 'Non-toxic & certified' },
+  { icon: RotateCcw, title: 'Easy returns', sub: '30-day happiness guarantee' },
+  { icon: Smile, title: 'Happy kids', sub: 'Loved by 50k+ families' },
+];
 
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('All Categories');
-  const [showCount, setShowCount] = useState(8);
+const ages = [
+  { label: '0–2 yrs', tone: 'tile-blush', blurb: 'Soft, safe first toys' },
+  { label: '3–5 yrs', tone: 'tile-butter', blurb: 'Imaginative play' },
+  { label: '6+ yrs', tone: 'tile-sky', blurb: 'STEM & big challenges' },
+];
 
-  const categories = [
-    'All Categories',
-    'Building Blocks',
-    'Stuffed Animals',
-    'Puzzles',
-    'Educational',
-    'Outdoor',
-    'Arts & Crafts',
-    'Action Figures',
-    'Board Games'
-  ];
+export default function Home() {
+  const [toast, setToast] = useState(null);
 
-  let filteredToys = toys;
-  if (search) {
-    let q = search.toLowerCase();
-    filteredToys = filteredToys.filter(toy => {
-      let nameMatch = toy.name.toLowerCase().includes(q);
-      let descMatch = toy.description && toy.description.toLowerCase().includes(q);
-      return nameMatch || descMatch;
-    });
-  }
-  if (category !== 'All Categories') {
-    filteredToys = filteredToys.filter(toy => toy.category === category);
-  }
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = "ToyTopia || Premium Toy Store";
-    AOS.init({ duration: 1000, once: true });
-  }, [location]);
-
-  useEffect(() => {
-    setShowCount(8);
-  }, [search, category]);
-
-  const scrollToToys = () => {
-    document.getElementById('toys-section')?.scrollIntoView({ behavior: 'smooth' });
+  const handleAdd = (toy) => {
+    addToCart(toy);
+    setToast(`${toy.name} added to your bag`);
+    setTimeout(() => setToast(null), 2200);
   };
 
-  const loadMore = () => setShowCount(prev => prev + 8);
-
   return (
-    <div className="overflow-hidden">
-      {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex items-center pt-20 pb-0 overflow-hidden bg-background">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-[0.2em] mb-4">
-                <Sparkles size={12} />
-                <span>Bangladesh's Favorite Toy Store</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight tracking-tight text-foreground">
-                Curated Toys for <br />
-                <span className="text-primary italic">Global Explorers</span>
-              </h1>
-              <p className="text-base text-muted-foreground/80 mb-8 max-w-md leading-relaxed">
-                Discover a minimalist universe of premium toys designed to inspire imagination, creativity, and joy.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button size="lg" onClick={scrollToToys} className="rounded-none px-10 gap-2">
-                  Shop Now <ArrowRight size={16} />
-                </Button>
-                <Button variant="outline" size="lg" className="rounded-none px-10">
-                  Our Mission
-                </Button>
-              </div>
+    <div className="pt-20">
+      {/* Announcement bar */}
+      <div className="bg-coral text-white">
+        <div className="shell flex items-center justify-center gap-2 py-2.5 text-center text-sm font-extrabold">
+          <Sparkles className="h-4 w-4" />
+          Free delivery on orders over $50 — this week only!
+        </div>
+      </div>
 
-              <div className="flex gap-8 mt-12 pt-10 border-t border-border/50">
-                <div>
-                  <div className="text-2xl font-bold">{toys.length}+</div>
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Products</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">4.9/5</div>
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Rating</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">24H</div>
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Delivery</div>
-                </div>
-              </div>
-            </motion.div>
+      {/* Hero */}
+      <section className="shell pt-8">
+        <div className="relative overflow-hidden rounded-[40px] bg-cream shadow-card">
+          <img
+            src={hero}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-y-0 right-0 h-full w-[62%] object-cover object-right sm:w-[58%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/90 to-transparent" />
+          <div className="relative grid min-h-[520px] items-center py-12">
+            <div className="max-w-xl px-6 sm:px-12">
+              <motion.span
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                className="eyebrow mb-5"
+              >
+                Toys for happy little humans
+              </motion.span>
+              <motion.h1
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+                className="text-4xl font-extrabold leading-[1.05] text-balance sm:text-6xl"
+              >
+                Toys that make little <span className="text-coral">eyes go wide</span>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                className="mt-5 max-w-md text-lg text-ink/75"
+              >
+                A playful world of cuddly friends, brain-boosting blocks and gifts that spark big imaginations.
+              </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="relative hidden lg:block"
-            >
-              <div className="aspect-[4/3] w-full overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=1000"
-                  alt="Premium Toy"
-                  className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700"
+              <motion.form
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+                onSubmit={(e) => e.preventDefault()}
+                className="mt-7 flex max-w-md items-center gap-2 rounded-full bg-white p-2 pl-5 shadow-card"
+              >
+                <Search className="h-5 w-5 text-ink/70" />
+                <input
+                  type="text"
+                  placeholder="Search teddy, blocks, puzzles…"
+                  className="w-full bg-transparent text-ink outline-none placeholder:text-ink/70"
                 />
-              </div>
-              {/* Subtle Overlay Card */}
-              <div className="absolute -bottom-6 -left-6 bg-background border border-border p-6 shadow-2xl max-w-[200px] z-20">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Exclusive</p>
-                <p className="text-sm font-bold leading-tight">Hand-picked collection of educational wonders.</p>
-              </div>
-            </motion.div>
+                <button type="submit" className="btn-coral px-5 py-2.5">Find</button>
+              </motion.form>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                className="mt-7 flex flex-wrap items-center gap-3"
+              >
+                <Link to="/all-toys" className="btn-coral">
+                  Shop all toys <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link to="/all-toys" className="btn-outline-toy">New arrivals</Link>
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Trending Section */ }
-  <Section
-    title="🔥 Trending This Week"
-    subtitle="Our most loved and requested items that are flying off the shelves."
-    className="bg-muted/30"
-  >
-    <Swiper
-      modules={[Navigation, Autoplay]}
-      spaceBetween={32}
-      slidesPerView={1}
-      navigation
-      autoplay={{ delay: 3000 }}
-      breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 }, 1280: { slidesPerView: 4 } }}
-      className="pb-12"
-    >
-      {toys.slice(0, 8).map((toy) => (
-        <SwiperSlide key={`trending-${toy.id}`} className="p-2">
-          <ToyCard toy={toy} />
-        </SwiperSlide>
-      ))}
-    </Swiper>
-  </Section>
-
-  {/* Features Grid */ }
-  <Section>
-    <div className="grid md:grid-cols-3 gap-8">
-      {[
-        { icon: Truck, title: "Fast Delivery", desc: "Express delivery across Bangladesh. Inside Dhaka within 24 hours.", color: "bg-blue-500", light: "bg-blue-50 text-blue-500" },
-        { icon: ShieldCheck, title: "100% Original", desc: "Authentic global brands. We guarantee quality and safety for your kids.", color: "bg-green-500", light: "bg-green-50 text-green-500" },
-        { icon: MapPin, title: "Physical Store", desc: "Visit our toy paradise at Agrabad, Chittagong and experience the joy.", color: "bg-purple-500", light: "bg-purple-50 text-purple-500" },
-      ].map((feature, i) => (
-        <motion.div
-          key={i}
-          whileHover={{ y: -10 }}
-          className="p-10 rounded-[3rem] bg-card border border-border/50 hover:border-primary/20 transition-all premium-shadow"
-        >
-          <div className={`w-16 h-16 rounded-3xl ${feature.light} flex items-center justify-center mb-8`}>
-            <feature.icon className="w-8 h-8" />
-          </div>
-          <h3 className="text-2xl font-black mb-4">{feature.title}</h3>
-          <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
-        </motion.div>
-      ))}
-    </div>
-  </Section>
-
-  {/* Main Catalog */ }
-  <main id="toys-section" className="py-24 px-4 bg-muted/20">
-    <div className="max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-        <div data-aos="fade-right">
-          <h2 className="text-4xl md:text-5xl font-black mb-4">Discover Your Next <span className="text-primary">Playmate</span></h2>
-          <p className="text-muted-foreground text-lg">Browse our complete collection by category or keywords.</p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto" data-aos="fade-left">
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <input
-              type="text"
-              placeholder="Search toys..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-12 pr-6 py-4 rounded-2xl bg-card border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none w-full sm:w-80 font-medium transition-all"
-            />
-          </div>
-          <div className="relative">
-            <SlidersHorizontal className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="pl-12 pr-10 py-4 rounded-2xl bg-card border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none font-bold cursor-pointer transition-all"
-            >
-              {categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {filteredToys.length === 0 ? (
-        <div className="text-center py-24 bg-card rounded-[3rem] border border-dashed border-border">
-          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
-            <Search className="w-10 h-10 text-muted-foreground" />
-          </div>
-          <h3 className="text-3xl font-black mb-4">Oh no! No toys found</h3>
-          <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">We couldn't find anything matching your search. Try adjusting your filters or keywords.</p>
-          <Button onClick={() => { setSearch(''); setCategory('All Categories'); }}>
-            Clear All Filters
-          </Button>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredToys.slice(0, showCount).map((toy) => (
-              <motion.div
-                key={toy.id}
-                layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <ToyCard toy={toy} />
-              </motion.div>
-            ))}
-          </div>
-
-          {filteredToys.length > showCount && (
-            <div className="text-center mt-20">
-              <Button variant="outline" size="lg" onClick={loadMore} className="group">
-                Load More ✨ ({filteredToys.length - showCount} magic left)
-              </Button>
+      {/* Trust strip */}
+      <section className="shell py-10">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {trust.map((t) => (
+            <div key={t.title} className="panel flex items-center gap-3 p-5">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-sun/20 text-sun">
+                <t.icon className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="font-extrabold">{t.title}</p>
+                <p className="text-sm text-ink/70">{t.sub}</p>
+              </div>
             </div>
-          )}
-        </>
-      )}
-    </div>
-  </main>
-    </div >
-  );
-};
+          ))}
+        </div>
+      </section>
 
-export default Home;
+      {/* Categories */}
+      <section className="shell py-8">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <span className="eyebrow mb-3">Browse the shelves</span>
+            <h2 className="text-3xl font-extrabold sm:text-4xl">Shop by category</h2>
+          </div>
+          <Link to="/all-toys" className="link-arrow hidden sm:inline-flex">See all <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+          {CATEGORIES.map((c) => {
+            const Icon = CATEGORY_ICON[c.slug];
+            return (
+              <Link key={c.slug} to={`/all-toys?category=${c.slug}`} className="group">
+                <div className={`${c.tile} flex aspect-square flex-col items-center justify-center rounded-[28px] border border-line shadow-card transition-transform duration-300 group-hover:-translate-y-1`}>
+                  {Icon && <Icon className="h-9 w-9 text-ink/80 transition-transform duration-300 group-hover:scale-110" strokeWidth={1.8} />}
+                  <span className="mt-3 px-2 text-center text-sm font-extrabold leading-tight">{c.label}</span>
+                </div>
+                <p className="mt-2 text-center text-xs font-bold text-ink/70">{c.hint}</p>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Trending */}
+      <section className="shell py-10">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <span className="eyebrow mb-3">Loved right now</span>
+            <h2 className="text-3xl font-extrabold sm:text-4xl">Trending this week</h2>
+          </div>
+          <Link to="/all-toys" className="link-arrow">View all <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {toys.slice(0, 8).map((t) => (
+            <ToyCard key={t.id} toy={t} onAdd={handleAdd} />
+          ))}
+        </div>
+      </section>
+
+      {/* Promo banner */}
+      <section className="shell py-8">
+        <div className="relative overflow-hidden rounded-[40px] bg-coral px-8 py-12 sm:px-14 sm:py-16">
+          <div className="relative max-w-lg">
+            <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white">Limited time</span>
+            <h3 className="mt-4 text-3xl font-extrabold text-white sm:text-4xl">Up to 30% off bundles</h3>
+            <p className="mt-3 max-w-md text-white/85">Mix and match a teddy, blocks and a puzzle into one cosy gift box. Perfect for birthdays.</p>
+            <Link to="/all-toys" className="btn-sun mt-6">Shop the sale <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Shop by age */}
+      <section className="shell py-10">
+        <div className="mb-8">
+          <span className="eyebrow mb-3">Pick the perfect match</span>
+          <h2 className="text-3xl font-extrabold sm:text-4xl">Shop by age</h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-3">
+          {ages.map((a) => (
+            <Link key={a.label} to={`/all-toys?age=${encodeURIComponent(a.label)}`}>
+              <div className={`${a.tone} group flex items-center gap-5 rounded-[28px] border border-line p-7 shadow-card transition-transform hover:-translate-y-1`}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 text-sm font-extrabold text-ink/80">
+                  {a.label.split('–')[0]}
+                </div>
+                <div>
+                  <p className="text-xl font-extrabold">{a.label}</p>
+                  <p className="text-sm text-ink/70">{a.blurb}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="shell pb-16 pt-6">
+        <div className="relative overflow-hidden rounded-[40px] bg-ink px-8 py-14 text-center sm:px-14">
+          <h3 className="mx-auto max-w-2xl text-3xl font-extrabold text-cream sm:text-4xl">Ready to make someone's day?</h3>
+          <p className="mx-auto mt-3 max-w-md text-cream/75">Join the ToyTopia fam for new drops, playful ideas and the odd discount.</p>
+          <Link to="/all-toys" className="btn-coral mt-7">Start exploring <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+      </section>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }}
+            className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-ink px-6 py-3 text-sm font-extrabold text-cream shadow-pop"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
